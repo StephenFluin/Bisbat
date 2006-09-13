@@ -9,15 +9,22 @@ public class SendCommands extends Thread {
 	/* Thread: Constantly prints user input to socket */
 	
 	private Socket socket;
+	private BufferedReader reader;
+	PrintWriter out;
 	
 	public SendCommands(Socket s) {
 		socket = s;
+		try {
+			reader = new BufferedReader(new InputStreamReader(System.in));
+			out = new PrintWriter(socket.getOutputStream(), true);
+		} catch(Exception e) {
+			System.out.println("Can't set up the command sending thread.");
+		}
 	}
 	
 	public void run() {
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+			
 			String command = reader.readLine();
 			while (!command.equals("exit")) {
 				out.println(command);
@@ -28,5 +35,10 @@ public class SendCommands extends Thread {
 			System.err.println("PrintInput Failed");
 			ioe.printStackTrace();
 		}
+	}
+	public void send(String s) {
+		out.write(s);
+		out.flush();
+		System.out.print(s);
 	}
 }

@@ -5,7 +5,7 @@ package bisbat;
 import java.io.*;
 import java.net.*;
 
-public class Connect {
+public class Connection {
 	/* Opens a connection to a socket
 	 * Prints input to/from system and socket */
 	
@@ -13,7 +13,7 @@ public class Connect {
 	private RecieveGameOutput in;
 	private SendCommands out;
 	
-	public Connect(String s, int port) {
+	public Connection(String s, int port) {
 		try {
 			socket = new Socket(s, port);
 			in = new RecieveGameOutput(new InputStreamReader(socket.getInputStream()));
@@ -25,11 +25,13 @@ public class Connect {
 			System.err.println("IO failure");
 			ioe.printStackTrace();
 		}
+		in.start();
+		out.start();
 	}
-	
-	public static void main (String[] args) {
-		Connect connection = new Connect("www.mortalpowers.com", 4000);
-		connection.in.start();
-		connection.out.start();
+	public void send(String s) {
+		if(s == null) {
+			System.out.println("THe string I am trying ot send is null.");
+		}
+		out.send(s);
 	}
 }

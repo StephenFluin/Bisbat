@@ -17,10 +17,15 @@ public class RecieveGameOutput extends Thread {
 		String line = "Starting PrintSteam";
 		while (line != null){
 			try {
+				line = reader.readLine();
+				if(line == null) {
+					// Then we are done reading lines (output from game is closed.)
+					return;
+				}
 				if(!line.equals("")) {
 					System.out.println(line);
 				}
-				line = reader.readLine();
+				
 			} catch (IOException e) {
 				System.err.println("PrintSteam failed");
 				e.printStackTrace();
