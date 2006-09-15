@@ -30,7 +30,7 @@ public class Connection {
 	}
 	public void send(String s) {
 		if(s == null) {
-			System.out.println("THe string I am trying ot send is null.");
+			System.out.println("The string I am trying ot send is null.");
 		}
 		out.send(s);
 	}
