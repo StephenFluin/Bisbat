@@ -11,6 +11,7 @@ public class RecieveGameOutput extends Thread {
 	private Bisbat bisbat;
 
 	public RecieveGameOutput (Bisbat bisbat, InputStreamReader i) {
+		this.bisbat = bisbat;
 		reader = new BufferedReader(i);
 	}
 	

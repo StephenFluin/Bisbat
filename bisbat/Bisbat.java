@@ -7,7 +7,7 @@ public class Bisbat extends Thread {
 	public String password = "alpha";
 	private String prompt;
 	public Bisbat() {
-		
+		prompt = "";
 	}
 	
 	/**
@@ -31,7 +31,7 @@ public class Bisbat extends Thread {
 		c.send("look");
 	}
 	public void setUpPrompt() {
-		prompt = "!!!BISBAT!!!";
+		prompt = "!!!BISBAT!!!%c";
 		c.send("prompt " + prompt);
 		
 	}
