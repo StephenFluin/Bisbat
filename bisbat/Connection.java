@@ -12,11 +12,13 @@ public class Connection {
 	private Socket socket;
 	private RecieveGameOutput in;
 	private SendCommands out;
+	private Bisbat bisbat;
 	
-	public Connection(String s, int port) {
+	public Connection(Bisbat bisbat, String s, int port) {
+		this.bisbat = bisbat;
 		try {
 			socket = new Socket(s, port);
-			in = new RecieveGameOutput(new InputStreamReader(socket.getInputStream()));
+			in = new RecieveGameOutput(bisbat, new InputStreamReader(socket.getInputStream()));
 			out = new SendCommands(socket);
 		} catch (UnknownHostException uhe) {
 			System.err.println("Host not found");

@@ -8,22 +8,31 @@ public class RecieveGameOutput extends Thread {
 	/* Thread: constantly prints a given input stream */
 	
 	private BufferedReader reader;
+	private Bisbat bisbat;
 
-	public RecieveGameOutput (InputStreamReader i) {
+	public RecieveGameOutput (Bisbat bisbat, InputStreamReader i) {
 		reader = new BufferedReader(i);
 	}
 	
 	public void run(){
 		String line = "Starting PrintSteam";
+		String buffer = "";
 		while (line != null){
 			try {
+				
 				line = reader.readLine();
 				if(line == null) {
 					// Then we are done reading lines (output from game is closed.)
 					return;
-				}
-				if(!line.equals("")) {
+				} else if(!line.equals("")) {
+					buffer += line;
+					if(line.equals(bisbat.getPrompt())) {
+						//Handle the buffer then clear it.
+						
+						buffer = "";
+					}
 					System.out.println(line);
+					
 				}
 				
 			} catch (IOException e) {
@@ -31,7 +40,6 @@ public class RecieveGameOutput extends Thread {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("PrintSteam closed");
 	}
 }
 
