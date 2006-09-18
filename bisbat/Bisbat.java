@@ -24,19 +24,24 @@ public class Bisbat extends Thread {
 	 	explore();
 	}
 	public void login() {
-		c.send(name + "\n" + password + "\n");
+		c.send(name);
+		c.send(password);
 		setUpPrompt();
 	}
 	public void explore() {
 		c.send("look");
 	}
 	public void setUpPrompt() {
-		prompt = "!!!BISBAT!!!%c";
+		prompt = "<prompt>%c";
 		c.send("prompt " + prompt);
 		
 	}
 	public String getPrompt() {
 		return prompt;
 	}
+	public String getPromptMatch() {
+		return ".?" + getPrompt().replaceAll("%.", ".?.?");
+	}
+
 
 }

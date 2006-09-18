@@ -37,8 +37,8 @@ public class SendCommands extends Thread {
 		}
 	}
 	public void send(String s) {
-		out.write(s);
+		out.write(s + "\n");
 		out.flush();
-		System.out.print(s);
+		System.out.print("->" + s + "\n");
 	}
 }
