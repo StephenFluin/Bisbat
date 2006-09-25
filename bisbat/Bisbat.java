@@ -1,13 +1,20 @@
 package bisbat;
 
+import java.util.ArrayList;
+
 public class Bisbat extends Thread {
 
 	public Connection c;
 	public String name = "Bisbat";
 	public String password = "alpha";
 	private String prompt;
+	public Room currentRoom;
+	public RoomFinder roomFindingThread;
 	public Bisbat() {
 		prompt = "";
+		roomFindingThread = new RoomFinder();
+		roomFindingThread.start();
+		
 	}
 	
 	/**
@@ -16,6 +23,7 @@ public class Bisbat extends Thread {
 	public static void main(String[] args) {
 		Bisbat alpha = new Bisbat();
 		alpha.start();
+		
 		 
 	}
 	public void run() {
@@ -27,6 +35,7 @@ public class Bisbat extends Thread {
 		c.send(name);
 		c.send(password);
 		setUpPrompt();
+		currentRoom = roomFindingThread.pop();
 	}
 	public void explore() {
 		c.send("look");
@@ -41,6 +50,11 @@ public class Bisbat extends Thread {
 	}
 	public String getPromptMatch() {
 		return ".?" + getPrompt().replaceAll("%.", ".?.?");
+	}
+
+	public void foundRoom(Room recentlyDiscoveredRoom) {
+		roomFindingThread.add(recentlyDiscoveredRoom);
+		
 	}
 
 

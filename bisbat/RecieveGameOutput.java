@@ -4,6 +4,7 @@ package bisbat;
 
 import java.io.*;
 import java.net.SocketException;
+import java.util.regex.*;
 
 public class RecieveGameOutput extends Thread {
 	/* Thread: constantly prints a given input stream */
@@ -32,7 +33,7 @@ public class RecieveGameOutput extends Thread {
 					buffer += line;
 					if(line.matches(bisbat.getPromptMatch())) {
 						//Handle the buffer then clear it.
-						
+						//System.out.println("Found the prompt!  Handling contents of buffer.");
 						handleOutput(buffer);
 						buffer = "";
 					} else {
@@ -63,10 +64,17 @@ public class RecieveGameOutput extends Thread {
 	}
 	public void handleOutput(String s) {
 		// Load info into a room if found.
-		if(s.matches("<>(.*)<>\n(.*)Exits:(.*).") ) {
-			//System.out.println("I see a room!");
+		Pattern roomPattern = Pattern.compile("<>(.*)<>(.*)Exits:(.*).(.*)");
+		Matcher roomMatcher = roomPattern.matcher(s);
+		if(roomMatcher.matches()) {
+			String title = roomMatcher.group(1);
+			String description =roomMatcher.group(2);
+			String exits = roomMatcher.group(3);
+			String beingsAndObjects = roomMatcher.group(4);
+			Room recentlyDiscoveredRoom = new Room(title, description, exits, beingsAndObjects);
+			bisbat.foundRoom(recentlyDiscoveredRoom);
 		} else {
-			//System.out.println("I don't see a room!");
+			//System.out.println("I don't see a room '" + s + "'!");
 		}
 	}
 }
