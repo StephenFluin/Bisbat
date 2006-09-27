@@ -36,9 +36,29 @@ public class Bisbat extends Thread {
 		c.send(password);
 		setUpPrompt();
 		currentRoom = roomFindingThread.pop();
+
 	}
 	public void explore() {
-		c.send("look");
+		
+		// situated search: random walk
+		// picks a random exit from the current room and goes that way
+		try {
+			while(true) {
+				int rand = (int)Math.round(Math.random() * (currentRoom.exits.size() -1));
+				c.send(currentRoom.exits.get(rand).getExitCommand());
+				currentRoom =  roomFindingThread.pop();
+				
+				this.sleep(4000); // wait awhile (slow walk)
+				
+				//System.out.println("Printing Current Room: ");
+				//currentRoom.print(); debugger
+				
+			}
+		} catch (Exception e) {
+			System.err.println("Error in random walk"); 
+			e.printStackTrace();
+		}
+		
 	}
 	public void setUpPrompt() {
 		prompt = "<prompt>%c";

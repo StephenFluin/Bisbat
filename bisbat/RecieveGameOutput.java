@@ -64,9 +64,10 @@ public class RecieveGameOutput extends Thread {
 	}
 	public void handleOutput(String s) {
 		// Load info into a room if found.
-		Pattern roomPattern = Pattern.compile("<>(.*)<>(.*)Exits:(.*).(.*)");
+		Pattern roomPattern = Pattern.compile(".*<>(.*)<>(.*)Exits:([^\\.]*)\\.(.*)");
 		Matcher roomMatcher = roomPattern.matcher(s);
 		if(roomMatcher.matches()) {
+			//System.out.println("~~~~~ Found a Room! ~~~~~"); // debugger
 			String title = roomMatcher.group(1);
 			String description =roomMatcher.group(2);
 			String exits = roomMatcher.group(3);

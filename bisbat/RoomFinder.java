@@ -14,11 +14,11 @@ public class RoomFinder extends Thread {
 	public Room pop() {
 		while(foundRooms.size() <= 0) {
 			try {
-				this.sleep(2);
+				this.sleep(2); // opptimize by using wait() and notify()?
 			} catch(Exception e) {
 				
 			}
 		}
-		return foundRooms.getFirst();
+		return foundRooms.removeFirst(); // get first does not "pop" the list
 	}
 }
