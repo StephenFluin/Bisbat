@@ -44,9 +44,17 @@ public class Bisbat extends Thread {
 		// picks a random exit from the current room and goes that way
 		try {
 			while(true) {
-				int rand = (int)Math.round(Math.random() * (currentRoom.exits.size() -1));
-				c.send(currentRoom.exits.get(rand).getExitCommand());
-				currentRoom =  roomFindingThread.pop();
+				
+				Exit chosenExit = currentRoom.getRandomUnexploredExit();
+				
+				c.send(chosenExit.getCommand());
+				String otherExitDirection = Exit.getOpposite(chosenExit.getCommand());
+				chosenExit.nextRoom = roomFindingThread.pop();
+				Room previousRoom = currentRoom;
+				currentRoom = chosenExit.nextRoom;
+				//System.out.println("Other direction is: " + otherExitDirection + " and it should exist in the most recently found room.");
+				currentRoom.getExit(otherExitDirection).nextRoom = previousRoom;
+				
 				
 				this.sleep(4000); // wait awhile (slow walk)
 				

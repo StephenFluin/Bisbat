@@ -18,7 +18,7 @@ public class Exit {
 			isDoor = false;
 		}
 	}
-	public Exit(String s, Room nRoom) {
+	/*public Exit(String s, Room nRoom) {
 		nextRoom = nRoom;
 		s = s.trim().toLowerCase(); // "West" != "west"
 		if (s.charAt(0) == '[' || s.charAt(0) == '<') {
@@ -28,14 +28,28 @@ public class Exit {
 			direction = s;
 			isDoor = false;
 		}
-	}
+	}*/
 	
-	public String getExitCommand() {
+	public String getCommand() {
 		if (isDoor) {
 			return "open " + direction + "\n" + direction;
 		} else {
 			return direction;
 		}
+	}
+	public static String getOpposite(String command) {
+		System.out.println("Finding the opposite of " + command);
+		if(command.equals("west")) return "east";
+		if(command.equals("east")) return "west";
+		if(command.equals("north")) return "south";
+		if(command.equals("south")) return "north";
+		if(command.equals("northwest")) return "southeast";
+		if(command.equals("southeast")) return "northwest";
+		if(command.equals("northeast")) return "southwest";
+		if(command.equals("southwest")) return "northeast";
+		if(command.equals("up")) return "down";
+		if(command.equals("down")) return "up";
+		return null;
 	}
 	
 	

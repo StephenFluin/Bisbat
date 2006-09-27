@@ -26,9 +26,37 @@ public class Room {
 	public void print() {
 		System.out.println("\n" + title + "\n" + description);
 		for (Exit e : exits) {
-			System.out.print(e.getExitCommand() + "  ");
+			System.out.print(e.getCommand() + "  ");
 		} 
 		System.out.print("\n\n");		
+	}
+	
+	Exit getRandomUnexploredExit() {
+		return getExit((int)Math.round(Math.random() * (exits.size() -1)));
+		
+	}
+	Exit getExit(int i) {
+		return exits.get(i);
+		
+	}
+	Exit getExit(String s) {
+		for(Exit e : exits) {
+			if(e.direction.equals(s)) {
+				return e;
+			}
+		}
+		return null;
+	}
+	void printTree(String tabs) {
+		System.out.println(tabs + title);
+		for(Exit e : exits) {
+			if(e.nextRoom != null && tabs.length() < 4) {
+				e.nextRoom.printTree(tabs + "\t");
+			}
+		}
+	}
+	void printTree() {
+		printTree("");
 	}
 	
 }

@@ -19,7 +19,7 @@ public class Connection {
 		try {
 			socket = new Socket(s, port);
 			in = new RecieveGameOutput(bisbat, new InputStreamReader(socket.getInputStream()));
-			out = new SendCommands(socket);
+			out = new SendCommands(socket, bisbat);
 		} catch (UnknownHostException uhe) {
 			System.err.println("Host not found");
 			uhe.printStackTrace();

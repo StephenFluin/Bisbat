@@ -11,8 +11,11 @@ public class SendCommands extends Thread {
 	private Socket socket;
 	private BufferedReader reader;
 	PrintWriter out;
+	public Bisbat bisbat;
 	
-	public SendCommands(Socket s) {
+
+	public SendCommands(Socket s, Bisbat b) {
+		bisbat = b;
 		socket = s;
 		try {
 			reader = new BufferedReader(new InputStreamReader(System.in));
@@ -26,6 +29,9 @@ public class SendCommands extends Thread {
 		try {
 			
 			String command = reader.readLine();
+			if(command.equals("printTree")) {
+				bisbat.currentRoom.printTree();
+			}
 			while (!command.equals("exit")) {
 				out.println(command);
 				command = reader.readLine();
