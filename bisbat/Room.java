@@ -11,8 +11,7 @@ public class Room {
 		for(String s : exitList) {
 			exits.add(new Exit(s));
 		}
-		
-		
+			
 		
 	}
 	public ArrayList<Exit> exits = new ArrayList<Exit>();
@@ -20,6 +19,40 @@ public class Room {
 	public String title = new String();
 	public ArrayList<Being> beings = new ArrayList<Being>();
 	public ArrayList<Item> items = new ArrayList<Item>();
+	
+	
+	//returns true if this room is indistinguishable from given room
+	public boolean matchesRoom(Room room) {
+		if (!title.equals(room.title)) return false;
+		if (!description.equals(room.description)) return false;
+		if (exits.size() != room.exits.size()) return false;
+		Exit temp;
+		for (Exit e : exits) {
+			temp = room.getExit(e.direction);
+			if (temp == null) return false;
+			if (e.isDoor != room.getExit(e.direction).isDoor) return false;
+		}
+		
+		// Should check adjacent rooms for difference too
+		// Possibly a depth limited bredth first search
+		// Without this, Bisbat will probably fail when presented with identical rooms
+		
+		return true; // can't find a difference
+	}
+	
+	//updates information of this room to match given room
+	public boolean update(Room room) {
+		if (!matchesRoom(room)) return false; //rooms don't match
+		beings = room.beings;
+		items = room.items;
+		Exit temp;
+		for (Exit e : exits) {
+			temp = room.getExit(e.direction);
+			if (e.isDoor) e.isDoorOpen = temp.isDoorOpen;
+		}
+		return true; 
+	}
+	
 	
 	//prints a string representation to system.out 
 	//this is a debugging method

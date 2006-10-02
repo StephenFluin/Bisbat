@@ -38,6 +38,8 @@ public class Bisbat extends Thread {
 		currentRoom = roomFindingThread.pop();
 
 	}
+	
+
 	public void explore() {
 		
 		// situated search: random walk
