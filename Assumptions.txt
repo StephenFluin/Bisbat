@@ -1,0 +1,18 @@
+Current assumptions that Bisbat makes:
+
+1. Exits are bidirectional. (e.g. going "east" then "west" returns him to where he just was).
+2. Rooms can be uniquely identified by title, description, and exit directions/doors.
+3. There are no "beings" or "objects" in the world.
+4. Game environment is non-agressive
+5. Time is not a factor
+6. All door are closed (and need opening)
+7. You can return to any place we have been before
+   * This is a logical postulate, not an unchecked situation
+8. It works!
+   * sorta
+
+
+What can Bisbat currently do:
+
+1. Wonder randomly.
+2. Knows how rooms he has been to connect to eachother.
