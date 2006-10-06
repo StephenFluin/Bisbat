@@ -58,7 +58,7 @@ public class Bisbat extends Thread {
 				currentRoom.getExit(otherExitDirection).nextRoom = previousRoom;
 				
 				
-				this.sleep(4000); // wait awhile (slow walk)
+				this.sleep(2000); // wait awhile (medium walk)
 				
 				//System.out.println("Printing Current Room: ");
 				//currentRoom.print(); debugger
