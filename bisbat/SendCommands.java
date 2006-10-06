@@ -26,21 +26,29 @@ public class SendCommands extends Thread {
 	}
 	
 	public void run() {
+		String command = null;
 		try {
 			
-			String command = reader.readLine();
-			if(command.equals("printTree")) {
-				bisbat.currentRoom.printTree();
+			command = reader.readLine();
+			
+			while (true) {
+					if(command.equals("exit")) {
+						throw(new NullPointerException());
+					} else if(command.equals("printTree")) {
+						bisbat.currentRoom.printTree();
+					} else {
+						out.println(command);
+					}
+					command = reader.readLine();
 			}
-			while (!command.equals("exit")) {
-				out.println(command);
-				command = reader.readLine();
-			}
-			out.println(command);
+			
 		} catch (IOException ioe) {
 			System.err.println("PrintInput Failed");
 			ioe.printStackTrace();
+		} catch (NullPointerException e) {
+			// We are probably done, ;)
 		}
+		out.println(command);
 	}
 	public void send(String s) {
 		out.write(s + "\n");

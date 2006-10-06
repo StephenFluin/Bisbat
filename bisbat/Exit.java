@@ -31,6 +31,9 @@ public class Exit {
 			return direction;
 		}
 	}
+	public String getDirection() {
+		return direction;
+	}
 	public static String getOpposite(String command) {
 		System.out.println("Finding the opposite of " + command);
 		if(command.equals("west")) return "east";

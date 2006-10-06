@@ -12,7 +12,7 @@ public class Bisbat extends Thread {
 	public RoomFinder roomFindingThread;
 	public Bisbat() {
 		prompt = "";
-		roomFindingThread = new RoomFinder();
+		roomFindingThread = new RoomFinder(this);
 		roomFindingThread.start();
 		
 	}
@@ -50,7 +50,7 @@ public class Bisbat extends Thread {
 				Exit chosenExit = currentRoom.getRandomUnexploredExit();
 				
 				c.send(chosenExit.getCommand());
-				String otherExitDirection = Exit.getOpposite(chosenExit.getCommand());
+				String otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
 				chosenExit.nextRoom = roomFindingThread.pop();
 				Room previousRoom = currentRoom;
 				currentRoom = chosenExit.nextRoom;
@@ -70,6 +70,11 @@ public class Bisbat extends Thread {
 		}
 		
 	}
+	public Room findRoomWithUnexploredExits(Room r) {
+		
+		// If there are no rooms with unexplored exits, then we are done mapping!
+		return null;
+	}
 	public void setUpPrompt() {
 		prompt = "<prompt>%c";
 		c.send("prompt " + prompt);
@@ -86,6 +91,20 @@ public class Bisbat extends Thread {
 		roomFindingThread.add(recentlyDiscoveredRoom);
 		
 	}
+	
+	/**
+	 * This method will be used to walk to a room that has unexplored exits, or
+	 * whenever we want to walk to a destination room.
+	 * @param walkMeToHere
+	 */
+	public void walkToRoomIfKnown(Room walkMeToHere) {
+		ArrayList<Exit> path = RoomFinder.searchForPathBetweenRooms(currentRoom, walkMeToHere);
+		for(Exit e : path) {
+			c.send(e.getCommand());
+			roomFindingThread.pop();
+		}
+	}
+	
 
 
 }

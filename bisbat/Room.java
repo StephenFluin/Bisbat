@@ -1,6 +1,7 @@
 package bisbat;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Room {
 	
@@ -21,26 +22,47 @@ public class Room {
 	public ArrayList<Item> items = new ArrayList<Item>();
 	
 	
-	//returns true if this room is indistinguishable from given room
+	/**
+	 * Returns true if this room is indistinguishable from given room.
+	 */
 	public boolean matchesRoom(Room room) {
-		if (!title.equals(room.title)) return false;
-		if (!description.equals(room.description)) return false;
-		if (exits.size() != room.exits.size()) return false;
+		/*System.out.println("Findy room:");
+		room.print();
+		System.out.println("This room:");
+		print();
+		*/
+		if (!title.equals(room.title)) {	
+			return false;
+		}
+		if (!description.equals(room.description)) {
+			return false;
+		}
+		if (exits.size() != room.exits.size()) {
+			return false;
+		}
 		Exit temp;
 		for (Exit e : exits) {
 			temp = room.getExit(e.direction);
-			if (temp == null) return false;
-			if (e.isDoor != room.getExit(e.direction).isDoor) return false;
+			if (temp == null) {
+				return false;
+			}
+			if (e.isDoor != temp.isDoor) {
+				return false;
+			}
 		}
 		
-		// Should check adjacent rooms for difference too
-		// Possibly a depth limited bredth first search
-		// Without this, Bisbat will probably fail when presented with identical rooms
-		
-		return true; // can't find a difference
+		/*
+		 Should check adjacent rooms for difference too
+		 Possibly a depth limited bredth first search
+		 Without this, Bisbat will probably fail when presented with identical rooms
+		*/
+		// can't find a difference
+		return true; 
 	}
 	
-	//updates information of this room to match given room
+	/** 
+	 * updates information of this room to match given room
+	 */
 	public boolean update(Room room) {
 		if (!matchesRoom(room)) return false; //rooms don't match
 		beings = room.beings;
@@ -54,18 +76,36 @@ public class Room {
 	}
 	
 	
-	//prints a string representation to system.out 
-	//this is a debugging method
+	/**
+	 * prints a string representation to system.out 
+	 * !TODO this is a debugging method
+	 */
 	public void print() {
-		System.out.println("\n" + title + "\n" + description);
-		for (Exit e : exits) {
-			System.out.print(e.getCommand() + "  ");
-		} 
-		System.out.print("\n\n");		
+		System.out.println(toString());
+		System.out.print("\n");		
+	}
+	public String toString() {
+		String result = "TITLE:" + title + "\nDESCRIPTION:" + description + "\n";
+		for(Exit e : exits) {
+			result += e.getCommand() + "\t";
+		}
+		return result;
 	}
 	
 	Exit getRandomUnexploredExit() {
-		return getExit((int)Math.round(Math.random() * (exits.size() -1)));
+		ArrayList<Exit> une = new ArrayList<Exit>();
+		for(Exit e : exits) {
+			if(e.nextRoom == null) {
+				une.add(e);
+			}
+		}
+		if(une.size() == 0) {
+			// Now we have finished this room, we need to go to another room that has unexplored exits.
+			System.out.println("Finished exploring this room.");
+			//return null;
+		}
+		//return une.get((int)Math.round(Math.random() * (une.size() -1)));
+		return getExit((int)Math.round(Math.random() * (exits.size() - 1)));
 		
 	}
 	Exit getExit(int i) {
@@ -80,16 +120,23 @@ public class Room {
 		}
 		return null;
 	}
-	void printTree(String tabs) {
-		System.out.println(tabs + title);
-		for(Exit e : exits) {
-			if(e.nextRoom != null && tabs.length() < 4) {
-				e.nextRoom.printTree(tabs + "\t");
+	void printTree(String tabs, ArrayList<Room> exploredRooms) {
+		if(!exploredRooms.contains(this)) {
+			exploredRooms.add(this);
+			System.out.println(tabs + this.title);
+			for(Exit e: exits) {
+				if(e.nextRoom != null) {
+					e.nextRoom.printTree(tabs + "\t", exploredRooms);
+				}
 			}
+			
 		}
 	}
-	void printTree() {
-		printTree("");
+	void printTree() {	
+		ArrayList<Room> explored = new ArrayList<Room>();
+		printTree("", explored);
 	}
+	
+
 	
 }
