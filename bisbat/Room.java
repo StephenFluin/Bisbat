@@ -51,9 +51,11 @@ public class Room {
 			}
 		}
 		
+		
+		
 		/*
 		 Should check adjacent rooms for difference too
-		 Possibly a depth limited bredth first search
+		 Possibly a depth limited breadth first search
 		 Without this, Bisbat will probably fail when presented with identical rooms
 		*/
 		// can't find a difference
@@ -61,7 +63,10 @@ public class Room {
 	}
 	
 	/** 
-	 * updates information of this room to match given room
+	 * updates information about the current state of this room 
+	 * using the given room.
+	 * 
+	 * @param room A room that has the update information about doors, items, and beings.
 	 */
 	public boolean update(Room room) {
 		if (!matchesRoom(room)) return false; //rooms don't match
@@ -70,7 +75,9 @@ public class Room {
 		Exit temp;
 		for (Exit e : exits) {
 			temp = room.getExit(e.direction);
-			if (e.isDoor) e.isDoorOpen = temp.isDoorOpen;
+			if (e.isDoor) {
+				e.isDoorOpen = temp.isDoorOpen;
+			}
 		}
 		return true; 
 	}
@@ -93,19 +100,17 @@ public class Room {
 	}
 	
 	Exit getRandomUnexploredExit() {
-		ArrayList<Exit> une = new ArrayList<Exit>();
-		for(Exit e : exits) {
-			if(e.nextRoom == null) {
-				une.add(e);
-			}
-		}
+		ArrayList<Exit> une = getUnexploredExits();
+
+		
 		if(une.size() == 0) {
 			// Now we have finished this room, we need to go to another room that has unexplored exits.
 			System.out.println("Finished exploring this room.");
-			//return null;
+			return null;
 		}
-		//return une.get((int)Math.round(Math.random() * (une.size() -1)));
-		return getExit((int)Math.round(Math.random() * (exits.size() - 1)));
+		
+		return une.get((int)Math.round(Math.random() * (une.size() -1)));
+		//return getExit((int)Math.round(Math.random() * (exits.size() - 1)));
 		
 	}
 	Exit getExit(int i) {
@@ -123,10 +128,10 @@ public class Room {
 	void printTree(String tabs, ArrayList<Room> exploredRooms) {
 		if(!exploredRooms.contains(this)) {
 			exploredRooms.add(this);
-			System.out.println(tabs + this.title);
+			System.out.println(tabs + this.title + "(" + getUnexploredExits().size() + ")");
 			for(Exit e: exits) {
 				if(e.nextRoom != null) {
-					e.nextRoom.printTree(tabs + "\t", exploredRooms);
+					e.nextRoom.printTree(tabs + "  ", exploredRooms);
 				}
 			}
 			
@@ -135,6 +140,16 @@ public class Room {
 	void printTree() {	
 		ArrayList<Room> explored = new ArrayList<Room>();
 		printTree("", explored);
+	}
+
+	public ArrayList<Exit> getUnexploredExits() {
+		ArrayList<Exit> une = new ArrayList<Exit>();
+		for(Exit e : exits) {
+			if(e.nextRoom == null) {
+				une.add(e);
+			}
+		}
+		return une;
 	}
 	
 

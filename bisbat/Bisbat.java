@@ -1,6 +1,7 @@
 package bisbat;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Bisbat extends Thread {
 
@@ -44,13 +45,17 @@ public class Bisbat extends Thread {
 		
 		// situated search: random walk
 		// picks a random exit from the current room and goes that way
+		String otherExitDirection = "";
 		try {
 			while(true) {
-				
+				currentRoom.printTree();
 				Exit chosenExit = currentRoom.getRandomUnexploredExit();
-				
+				if(chosenExit == null) {
+					walkToRoomIfKnown(findRoomWithUnexploredExits());
+					chosenExit = currentRoom.getRandomUnexploredExit();
+				}
 				c.send(chosenExit.getCommand());
-				String otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
+				otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
 				chosenExit.nextRoom = roomFindingThread.pop();
 				Room previousRoom = currentRoom;
 				currentRoom = chosenExit.nextRoom;
@@ -64,14 +69,35 @@ public class Bisbat extends Thread {
 				//currentRoom.print(); debugger
 				
 			}
+		} catch(NullPointerException e) {
+			System.out.println("Current Room Title: " + currentRoom.title + " otherExitDirection:" + otherExitDirection);
 		} catch (Exception e) {
 			System.err.println("Error in random walk"); 
 			e.printStackTrace();
-		}
+		} 
 		
 	}
-	public Room findRoomWithUnexploredExits(Room r) {
+	public Room findRoomWithUnexploredExits() {
+		LinkedList<Room> exploredRooms = new LinkedList<Room>();
+		LinkedList<Room> searchQueue = new LinkedList<Room>();
+		searchQueue.add(currentRoom);
 		
+		while(searchQueue.size() > 0) {
+			Room currentRoom = searchQueue.removeFirst();
+			if(!exploredRooms.contains(currentRoom)) {
+				exploredRooms.add(currentRoom);
+				if(currentRoom.getUnexploredExits().size() > 0) {
+					return currentRoom;
+				} else {
+					for(Exit e : currentRoom.exits) {
+						if(e.nextRoom != null) {
+							searchQueue.add(e.nextRoom);
+						}
+					}
+				}
+			}
+			
+		}
 		// If there are no rooms with unexplored exits, then we are done mapping!
 		return null;
 	}
@@ -98,10 +124,20 @@ public class Bisbat extends Thread {
 	 * @param walkMeToHere
 	 */
 	public void walkToRoomIfKnown(Room walkMeToHere) {
-		ArrayList<Exit> path = RoomFinder.searchForPathBetweenRooms(currentRoom, walkMeToHere);
+		System.out.println("We are walking to a given room, (currently because it has unexplored exits: " + walkMeToHere.title);
+		ArrayList<Exit> path = null;
+		try {
+			path = RoomFinder.searchForPathBetweenRooms(currentRoom, walkMeToHere);
+		} catch(OutOfMemoryError e) {
+			System.out.println("We had a wee bit of trouble searching for the path between two rooms. OUT OF MEMORY!");
+		}
+		System.out.println("Finished mapping where I want to go.");
 		for(Exit e : path) {
 			c.send(e.getCommand());
-			roomFindingThread.pop();
+			
+			
+			currentRoom = roomFindingThread.pop();
+			
 		}
 	}
 	

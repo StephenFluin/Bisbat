@@ -1,6 +1,7 @@
 package bisbat;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Exit {
 
@@ -35,7 +36,7 @@ public class Exit {
 		return direction;
 	}
 	public static String getOpposite(String command) {
-		System.out.println("Finding the opposite of " + command);
+		//System.out.println("Finding the opposite of " + command);
 		if(command.equals("west")) return "east";
 		if(command.equals("east")) return "west";
 		if(command.equals("north")) return "south";
@@ -47,6 +48,53 @@ public class Exit {
 		if(command.equals("up")) return "down";
 		if(command.equals("down")) return "up";
 		return null;
+	}
+
+	public static double spatialRelativityCalculation(ArrayList<Exit> path) {
+		Hashtable<String,Integer> exitList = new Hashtable<String,Integer>();
+		String direction;
+		ArrayList<String> directionList = new ArrayList<String>();
+
+		for(Exit e : path) {
+			
+			direction = e.getDirection();
+			if((direction.length() > 6) && (direction.contains("east") || direction.contains("west"))) {
+				directionList.add(direction.substring(0, 4));
+				directionList.add(direction.substring(5));
+			} else {
+				directionList.add(direction);
+				//System.out.println("Adding single direction to list:" + direction);
+			}
+			
+		}
+		for(String dir : directionList) {
+			//System.out.println("dir='" + dir + "'.");
+			if(exitList.containsKey(dir) || exitList.containsKey(Exit.getOpposite(dir))) {
+				if(exitList.containsKey(dir)) {
+					exitList.put(dir, exitList.get(dir).intValue()+1);
+				} else {
+					exitList.put(Exit.getOpposite(dir), exitList.get(Exit.getOpposite(dir)).intValue()-1);
+				}
+			} else {
+				exitList.put(dir, 1);
+			}
+		}
+		
+		double result = 0.0f;
+		for(String s: exitList.keySet()) {
+			int distance = exitList.get(s);
+			//System.out.println("Distance for " + s + " was " + distance + ".");
+			result += distance*distance;
+			
+		}
+		result = Math.sqrt(result);
+		System.out.println("We just did some cool spatial calculations, and we got: " + result);
+		/*System.out.print("FYI, that was from path: ");
+		for(Exit e : path) {
+			System.out.print(e.getDirection() + ", ");
+		}
+		System.out.println();*/
+		return result;
 	}
 	
 	

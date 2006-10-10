@@ -39,7 +39,7 @@ public class RecieveGameOutput extends Thread {
 					} else {
 						//System.out.println("Line(' " + line + " ' != '"  + bisbat.getPromptMatch()+ "'.");
 					}
-					System.out.println("<-" + line);
+					//System.out.println("<-" + line);
 					
 				}
 				
