@@ -8,8 +8,8 @@ Current assumptions that Bisbat makes:
 6. All door are closed (and need opening)
 7. You can return to any place we have been before
    * This is a logical postulate, not an unchecked situation
-8. It works!
-   * sorta
+8. Rooms cannot link to themselves.
+9. Going from one room in one direction will not lead back to that room. (spatial location).
 
 
 What can Bisbat currently do:
