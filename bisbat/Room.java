@@ -94,7 +94,7 @@ public class Room {
 	public String toString() {
 		String result = "TITLE:" + title + "\nDESCRIPTION:" + description + "\n";
 		for(Exit e : exits) {
-			result += e.getCommand() + "\t";
+			result += e.getDirection() + "\t";
 		}
 		return result;
 	}
@@ -125,7 +125,7 @@ public class Room {
 		}
 		return null;
 	}
-	void printTree(String tabs, ArrayList<Room> exploredRooms) {
+	/*void printTree(String tabs, ArrayList<Room> exploredRooms) {
 		if(!exploredRooms.contains(this)) {
 			exploredRooms.add(this);
 			System.out.println(tabs + this.title + "(" + getUnexploredExits().size() + ")");
@@ -140,6 +140,29 @@ public class Room {
 	void printTree() {	
 		ArrayList<Room> explored = new ArrayList<Room>();
 		printTree("", explored);
+	}*/
+	
+	void printTree(){
+		int counter = 0;
+		LinkedList<Room> exploredRooms = new LinkedList<Room>();
+		LinkedList<Pair<Room,String>> searchQueue = new LinkedList<Pair<Room,String>>();
+		searchQueue.add(new Pair<Room,String>(this, ""));
+		
+		while(searchQueue.size() > 0) {
+			Pair<Room,String> currentPair = searchQueue.removeFirst();
+			if(!exploredRooms.contains(currentPair.left)) {
+				counter++;
+				exploredRooms.add(currentPair.left);
+				System.out.println(currentPair.right + currentPair.left.title + "(" + currentPair.left.getUnexploredExits().size() + ")");
+				for(Exit e : currentPair.left.exits) {
+					if(e.nextRoom != null) {
+						searchQueue.add(new Pair<Room,String>(e.nextRoom, currentPair.right + "  "));
+					}
+				}
+			}
+		}
+		System.out.println("Total rooms:" + counter);
+		
 	}
 
 	public ArrayList<Exit> getUnexploredExits() {

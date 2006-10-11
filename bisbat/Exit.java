@@ -10,6 +10,11 @@ public class Exit {
 	public Room nextRoom; // null if unknown
 	public String direction;
 	
+	
+	/**
+	 * Constructs an exit.
+	 * @param s The direction of the exit.
+	 */
 	public Exit(String s) {
 		s = s.trim().toLowerCase(); // "West" != "west"
 		if (s.charAt(0) == '[' || s.charAt(0) == '<') {
@@ -25,11 +30,11 @@ public class Exit {
 		}
 	}
 	
-	public String getCommand() {
+	public String getDoorCommand() {
 		if (isDoor) {
-			return "open " + direction + "\n" + direction;
+			return "open " + direction;
 		} else {
-			return direction;
+			return null;
 		}
 	}
 	public String getDirection() {
@@ -59,7 +64,7 @@ public class Exit {
 			
 			direction = e.getDirection();
 			if((direction.length() > 6) && (direction.contains("east") || direction.contains("west"))) {
-				directionList.add(direction.substring(0, 4));
+				directionList.add(direction.substring(0,5));
 				directionList.add(direction.substring(5));
 			} else {
 				directionList.add(direction);
@@ -68,15 +73,19 @@ public class Exit {
 			
 		}
 		for(String dir : directionList) {
-			//System.out.println("dir='" + dir + "'.");
-			if(exitList.containsKey(dir) || exitList.containsKey(Exit.getOpposite(dir))) {
-				if(exitList.containsKey(dir)) {
-					exitList.put(dir, exitList.get(dir).intValue()+1);
+			try{
+				if(exitList.containsKey(dir) || exitList.containsKey(Exit.getOpposite(dir))) {
+					if(exitList.containsKey(dir)) {
+						exitList.put(dir, exitList.get(dir).intValue()+1);
+					} else {
+						exitList.put(Exit.getOpposite(dir), exitList.get(Exit.getOpposite(dir)).intValue()-1);
+					}
 				} else {
-					exitList.put(Exit.getOpposite(dir), exitList.get(Exit.getOpposite(dir)).intValue()-1);
+					exitList.put(dir, 1);
 				}
-			} else {
-				exitList.put(dir, 1);
+			} catch (NullPointerException e) {
+				System.out.println("dir='" + dir + "', opDir ='" + Exit.getOpposite(dir) + "'.");
+				e.printStackTrace();
 			}
 		}
 		
@@ -89,11 +98,11 @@ public class Exit {
 		}
 		result = Math.sqrt(result);
 		System.out.println("We just did some cool spatial calculations, and we got: " + result);
-		/*System.out.print("FYI, that was from path: ");
+		System.out.print("FYI, that was from path: ");
 		for(Exit e : path) {
 			System.out.print(e.getDirection() + ", ");
 		}
-		System.out.println();*/
+		System.out.println();
 		return result;
 	}
 	

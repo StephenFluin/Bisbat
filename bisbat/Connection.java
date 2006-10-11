@@ -36,4 +36,17 @@ public class Connection {
 		}
 		out.send(s);
 	}
+	public void sendNavigation(String command) {
+		send(command);
+		bisbat.roomFindingThread.add(command);
+	}
+	public void follow(Exit chosenExit) {
+		String dCommand = chosenExit.getDoorCommand();
+		if(dCommand != null) {
+			send(dCommand);
+		}
+		sendNavigation(chosenExit.direction);
+		
+		
+	}
 }

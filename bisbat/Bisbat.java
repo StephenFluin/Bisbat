@@ -36,6 +36,7 @@ public class Bisbat extends Thread {
 		c.send(name);
 		c.send(password);
 		setUpPrompt();
+		roomFindingThread.add("look");
 		currentRoom = roomFindingThread.pop();
 
 	}
@@ -48,13 +49,13 @@ public class Bisbat extends Thread {
 		String otherExitDirection = "";
 		try {
 			while(true) {
-				currentRoom.printTree();
+				//currentRoom.printTree();
 				Exit chosenExit = currentRoom.getRandomUnexploredExit();
 				if(chosenExit == null) {
 					walkToRoomIfKnown(findRoomWithUnexploredExits());
 					chosenExit = currentRoom.getRandomUnexploredExit();
 				}
-				c.send(chosenExit.getCommand());
+				c.follow(chosenExit);
 				otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
 				chosenExit.nextRoom = roomFindingThread.pop();
 				Room previousRoom = currentRoom;
@@ -70,7 +71,8 @@ public class Bisbat extends Thread {
 				
 			}
 		} catch(NullPointerException e) {
-			System.out.println("Current Room Title: " + currentRoom.title + " otherExitDirection:" + otherExitDirection);
+			System.out.println("Null Pointer\nCurrent Room Title: " + currentRoom.title + " otherExitDirection:" + otherExitDirection);
+			e.printStackTrace();
 		} catch (Exception e) {
 			System.err.println("Error in random walk"); 
 			e.printStackTrace();
@@ -124,21 +126,26 @@ public class Bisbat extends Thread {
 	 * @param walkMeToHere
 	 */
 	public void walkToRoomIfKnown(Room walkMeToHere) {
-		System.out.println("We are walking to a given room, (currently because it has unexplored exits: " + walkMeToHere.title);
+		//System.out.println("We are walkToRoomIfKnown ing.");
+		System.out.println("Current KB:");
+		//currentRoom.printTree();
 		ArrayList<Exit> path = null;
 		try {
 			path = RoomFinder.searchForPathBetweenRooms(currentRoom, walkMeToHere);
 		} catch(OutOfMemoryError e) {
 			System.out.println("We had a wee bit of trouble searching for the path between two rooms. OUT OF MEMORY!");
 		}
-		System.out.println("Finished mapping where I want to go.");
+		System.out.println("Following a path from " + currentRoom.title + " to  " + walkMeToHere.title);
 		for(Exit e : path) {
-			c.send(e.getCommand());
+			c.follow(e);
 			
 			
-			currentRoom = roomFindingThread.pop();
+			roomFindingThread.pop(false);
+			currentRoom = e.nextRoom;
+			//currentRoom.printTree();
 			
 		}
+		//System.out.println("Done following the path.");
 	}
 	
 

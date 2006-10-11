@@ -55,4 +55,5 @@ public class SendCommands extends Thread {
 		out.flush();
 		System.out.print("->" + s + "\n");
 	}
+
 }
