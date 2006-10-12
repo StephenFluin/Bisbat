@@ -4,6 +4,7 @@ package bisbat;
 
 import java.io.*;
 import java.net.SocketException;
+import java.util.Vector;
 import java.util.regex.*;
 
 public class RecieveGameOutput extends Thread {
@@ -30,16 +31,17 @@ public class RecieveGameOutput extends Thread {
 					return;
 				} else if(!line.equals("")) {
 					line = decolor(line);
-					buffer += line;
+					
 					if(line.matches(bisbat.getPromptMatch())) {
 						//Handle the buffer then clear it.
-						//System.out.println("Found the prompt!  Handling contents of buffer.");
+						System.out.println("Found the prompt!  Handling contents of buffer.");
 						handleOutput(buffer);
 						buffer = "";
 					} else {
+						buffer += line;
 						//System.out.println("Line(' " + line + " ' != '"  + bisbat.getPromptMatch()+ "'.");
 					}
-					//System.out.println("<-" + line);
+					System.out.println("<-" + line);
 					
 				}
 				
@@ -64,19 +66,42 @@ public class RecieveGameOutput extends Thread {
 	}
 	public void handleOutput(String s) {
 		// Load info into a room if found.
-		Pattern roomPattern = Pattern.compile(".*<>(.*)<>(.*)Exits:([^\\.]*)\\.(.*)");
+		//Bisbat.print("handling output");
+		//System.out.println(s);
+		Pattern roomPattern = Pattern.compile(".*<>(.*)<>(.*)Exits:([^\\.]*)\\.(.*)$" );
 		Matcher roomMatcher = roomPattern.matcher(s);
 		if(roomMatcher.matches()) {
-			//System.out.println("~~~~~ Found a Room! ~~~~~"); // debugger
+			System.out.println("~~~~~ Found a Room! ~~~~~"); // debugger
 			String title = roomMatcher.group(1);
 			String description =roomMatcher.group(2);
 			String exits = roomMatcher.group(3);
 			String beingsAndObjects = roomMatcher.group(4);
-			Room recentlyDiscoveredRoom = new Room(title, description, exits, beingsAndObjects);
+			
+			String[] roomOccupants = beingsAndObjects.split("\n");
+			//System.out.println("Beings and objects = '" + beingsAndObjects + "'.");
+			Vector<Being> beings = new Vector<Being>();
+			Vector<Item> items = new Vector<Item>();
+			for(String occupant : roomOccupants) {
+				System.out.println("occupant:" + occupant);
+				if(occupant.startsWith("M:")) {
+					Being b = new Being(occupant.substring(2));
+					beings.add(b);
+					bisbat.addKnowledgeOf(b);
+				} else if(occupant.startsWith("I:")) {
+					Item i = new Item(occupant.substring(2));
+					items.add(i);
+					bisbat.addKnowledgeOf(i);
+				}
+			}
+			
+			
+			Room recentlyDiscoveredRoom = new Room(title, description, exits, beings, items);
 			bisbat.foundRoom(recentlyDiscoveredRoom);
 		} else {
-			//System.out.println("I don't see a room '" + s + "'!");
+			System.out.println("<--" + s);
+			bisbat.resultQueue.add(s);
 		}
+		//Bisbat.print("Done handlign output.");
 	}
 }
 

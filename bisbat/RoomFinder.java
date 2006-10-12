@@ -33,14 +33,16 @@ public class RoomFinder extends Thread {
 		return pop(true);
 	}
 	public Room pop(boolean discovering) {
-
+		//Bisbat.print("Waiting for a room.");
 		while(foundRooms.size() <= 0) {
+			
 			try {
-				Thread.sleep(250); // Optimize with semaphores? !TODO
+				Thread.sleep(100); // Optimize with semaphores? !TODO
 			} catch(Exception e) {
-				
+				e.printStackTrace();
 			}
 		}
+		//Bisbat.print("F0und a room to pop.");
 		if(!discovering) {
 			return popFirstRoom();
 
@@ -67,7 +69,7 @@ public class RoomFinder extends Thread {
 	 *  it has to be at least 2 away, and its spacial relativity must be less than 2.
 	 */
 	static public Room searchForMatchingRoom(Room indexRoom, Room findMe, String command, boolean discovering) {
-		
+		//Bisbat.print("searching for matching room");
 		
 		LinkedList<Room> exploredRooms = new LinkedList<Room>();
 		LinkedList<Room> searchQueue = new LinkedList<Room>();
@@ -89,6 +91,7 @@ public class RoomFinder extends Thread {
 					path.add(0,new Exit(Exit.getOpposite(command)));
 					if(path.size() > 2) {
 						if(Exit.spatialRelativityCalculation(path) < .99) {
+							//Bisbat.print("Found a room that matched.");
 							return currentRoom;
 						} else {
 							//System.out.println("Probably was too far away.");
@@ -113,6 +116,7 @@ public class RoomFinder extends Thread {
 			}
 			
 		}
+		//Bisbat.print("Didn't find a room that matched.");
 		return null;
 	}
 	

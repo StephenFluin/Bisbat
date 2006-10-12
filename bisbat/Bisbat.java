@@ -1,7 +1,11 @@
 package bisbat;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
+import java.util.Vector;
+
+import java.util.GregorianCalendar;
 
 public class Bisbat extends Thread {
 
@@ -10,11 +14,15 @@ public class Bisbat extends Thread {
 	public String password = "alpha";
 	private String prompt;
 	public Room currentRoom;
+	public Vector<Being> beingList = new Vector<Being>();
+	public Vector<Item> itemList = new Vector<Item>();
 	public RoomFinder roomFindingThread;
+	public ResultQueue resultQueue;
 	public Bisbat() {
 		prompt = "";
 		roomFindingThread = new RoomFinder(this);
 		roomFindingThread.start();
+		resultQueue  = new ResultQueue();
 		
 	}
 	
@@ -36,6 +44,7 @@ public class Bisbat extends Thread {
 		c.send(name);
 		c.send(password);
 		setUpPrompt();
+		resultQueue.pop();
 		roomFindingThread.add("look");
 		currentRoom = roomFindingThread.pop();
 
@@ -46,9 +55,11 @@ public class Bisbat extends Thread {
 		
 		// situated search: random walk
 		// picks a random exit from the current room and goes that way
+		print("Starting exploration");
 		String otherExitDirection = "";
 		try {
 			while(true) {
+				//print("Explore loop entrance.");
 				//currentRoom.printTree();
 				Exit chosenExit = currentRoom.getRandomUnexploredExit();
 				if(chosenExit == null) {
@@ -63,8 +74,7 @@ public class Bisbat extends Thread {
 				//System.out.println("Other direction is: " + otherExitDirection + " and it should exist in the most recently found room.");
 				currentRoom.getExit(otherExitDirection).nextRoom = previousRoom;
 				
-				
-				this.sleep(2000); // wait awhile (medium walk)
+			
 				
 				//System.out.println("Printing Current Room: ");
 				//currentRoom.print(); debugger
@@ -77,6 +87,7 @@ public class Bisbat extends Thread {
 			System.err.println("Error in random walk"); 
 			e.printStackTrace();
 		} 
+		print("Done exploration");
 		
 	}
 	public Room findRoomWithUnexploredExits() {
@@ -112,7 +123,9 @@ public class Bisbat extends Thread {
 		return prompt;
 	}
 	public String getPromptMatch() {
-		return ".?" + getPrompt().replaceAll("%.", ".?.?");
+		String s = getPrompt().replaceAll("%c", ".?.?");
+		s = s.replaceAll("%.", "\\\\d+");
+		return s;
 	}
 
 	public void foundRoom(Room recentlyDiscoveredRoom) {
@@ -127,15 +140,15 @@ public class Bisbat extends Thread {
 	 */
 	public void walkToRoomIfKnown(Room walkMeToHere) {
 		//System.out.println("We are walkToRoomIfKnown ing.");
-		System.out.println("Current KB:");
+		//System.out.println("Current KB:");
 		//currentRoom.printTree();
 		ArrayList<Exit> path = null;
-		try {
+		try {//System.out.println("I don't see a room '" + s + "'!");
 			path = RoomFinder.searchForPathBetweenRooms(currentRoom, walkMeToHere);
 		} catch(OutOfMemoryError e) {
 			System.out.println("We had a wee bit of trouble searching for the path between two rooms. OUT OF MEMORY!");
 		}
-		System.out.println("Following a path from " + currentRoom.title + " to  " + walkMeToHere.title);
+		//System.out.println("Following a path from " + currentRoom.title + " to  " + walkMeToHere.title);
 		for(Exit e : path) {
 			c.follow(e);
 			
@@ -146,6 +159,43 @@ public class Bisbat extends Thread {
 			
 		}
 		//System.out.println("Done following the path.");
+	}
+	static GregorianCalendar cal;
+    static public void print(String string) {
+    	cal = new GregorianCalendar();
+        System.out.println("(" + cal.getTime().toString() + ") "  + string);
+    }
+
+	public void addKnowledgeOf(Item i) {
+		if(itemList.contains(i)) {
+			
+		} else {
+			itemList.add(i);
+		}
+		
+	}
+	public void addKnowledgeOf(Being b) {
+		if(beingList.contains(b)) {
+			
+		} else {
+			considerAndGuessName(b);
+			beingList.add(b);
+		}
+	}
+
+	private void considerAndGuessName(Being b) {
+		System.out.println("COnsidering and GUessing! V2.0");
+		while(!b.isSureOfName()) {
+			c.send("consider " + b.guessName());
+			String result = resultQueue.pop();
+			System.out.println("Jujubeans go pop");
+			if(result.equals("You don't see that here.")) {
+				b.setGuessResult(false);
+			} else {
+				b.setGuessResult(true);
+			}
+		}
+		
 	}
 	
 

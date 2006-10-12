@@ -2,24 +2,27 @@ package bisbat;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Vector;
 
 public class Room {
 	
-	public Room(String rTitle, String rDescription, String rExits, String beingsAndObjects) {
+	public Room(String rTitle, String rDescription, String rExits, Vector<Being> Beings, Vector<Item> Items) {
 		title = rTitle;
 		description = rDescription;
 		String[] exitList = rExits.split(", ");
 		for(String s : exitList) {
 			exits.add(new Exit(s));
 		}
-			
+		beings = Beings;
+		items = Items;
+
 		
 	}
 	public ArrayList<Exit> exits = new ArrayList<Exit>();
 	public String description = new String();
 	public String title = new String();
-	public ArrayList<Being> beings = new ArrayList<Being>();
-	public ArrayList<Item> items = new ArrayList<Item>();
+	public Vector<Being> beings = new Vector<Being>();
+	public Vector<Item> items = new Vector<Item>();
 	
 	
 	/**
@@ -105,7 +108,7 @@ public class Room {
 		
 		if(une.size() == 0) {
 			// Now we have finished this room, we need to go to another room that has unexplored exits.
-			System.out.println("Finished exploring this room.");
+			//System.out.println("Finished exploring this room.");
 			return null;
 		}
 		
@@ -153,7 +156,7 @@ public class Room {
 			if(!exploredRooms.contains(currentPair.left)) {
 				counter++;
 				exploredRooms.add(currentPair.left);
-				System.out.println(currentPair.right + currentPair.left.title + "(" + currentPair.left.getUnexploredExits().size() + ")");
+				System.out.println(currentPair.right + currentPair.left.title + "(" + currentPair.left.getUnexploredExits().size() + "/" + currentPair.left.exits.size() + ")");
 				for(Exit e : currentPair.left.exits) {
 					if(e.nextRoom != null) {
 						searchQueue.add(new Pair<Room,String>(e.nextRoom, currentPair.right + "  "));

@@ -46,6 +46,7 @@ public class SendCommands extends Thread {
 			System.err.println("PrintInput Failed");
 			ioe.printStackTrace();
 		} catch (NullPointerException e) {
+			e.printStackTrace();
 			// We are probably done, ;)
 		}
 		out.println(command);

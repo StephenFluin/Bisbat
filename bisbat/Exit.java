@@ -97,12 +97,17 @@ public class Exit {
 			
 		}
 		result = Math.sqrt(result);
-		System.out.println("We just did some cool spatial calculations, and we got: " + result);
-		System.out.print("FYI, that was from path: ");
+		//System.out.println("We just did some cool spatial calculations, and we got: " + result );
+		try{
+			//Thread.sleep(300);
+		} catch(Exception e) {
+			
+		}
+		/*System.out.print("FYI, that was from path: ");
 		for(Exit e : path) {
 			System.out.print(e.getDirection() + ", ");
 		}
-		System.out.println();
+		System.out.println();*/
 		return result;
 	}
 	
