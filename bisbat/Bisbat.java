@@ -3,6 +3,7 @@ package bisbat;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
+import java.util.Stack;
 import java.util.Vector;
 
 public class Bisbat extends Thread {
@@ -14,10 +15,11 @@ public class Bisbat extends Thread {
 	public String password;
 	private String prompt;
 	public Room currentRoom;
-	public Vector<Being> knwonBeingList;
+	public Vector<Being> knownBeingList;
 	public Vector<Item> knownItemList;
 	public RoomFinder roomFindingThread;
 	public ResultQueue resultQueue;
+	public Stack<Pair<String,Object>> toDoList;
 	
 	/**
 	 * Constructs a new instance of Bisbat
@@ -28,7 +30,7 @@ public class Bisbat extends Thread {
 		name = loginName;
 		password = loginPassword;
 		prompt = "";
-		knwonBeingList = new Vector<Being>();
+		knownBeingList = new Vector<Being>();
 		knownItemList = new Vector<Item>();
 		roomFindingThread = new RoomFinder(this);
 		roomFindingThread.start();
@@ -38,7 +40,41 @@ public class Bisbat extends Thread {
 	public void run() {
 		connection = new Connection(this, "www.mortalpowers.com", 4000);
 	 	login();
-	 	explore();
+	 	toDoList = new Stack<Pair<String,Object>>();
+	 	toDoList.push(new Pair<String,Object>("survive", null));
+	 	toDoList.push(new Pair<String,Object>("explore", null));
+	 	while(toDoList.size() > 0) {
+	 		Pair<String,Object> toDoItem = toDoList.pop();
+	 		if(toDoItem.left.equals("explore")) {
+	 			explore();
+	 		} else if(toDoItem.left.equals("consider")) {
+	 			if(toDoItem.right instanceof Being) {
+	 				Being b = ((Being)toDoItem.right);
+	 				connection.send("consider " + b.guessName());
+	 				debug("Considering a mobile");
+	 				String result = resultQueue.pop();
+	 				if(!b.setGuessResult(result)) {
+	 					toDoList.push(new Pair<String,Object>("consider", b));
+	 				} else {
+	 					if(!b.isSureOfName()) {
+	 						toDoList.push(new Pair<String,Object>("consider", b));
+	 					}
+	 				}
+	 				
+	 			} else {
+	 				debug("We were given a non-being to consider, you fool!");
+	 			}
+	 		} else if(toDoItem.left.equals("survive")) {
+	 			print("Good job, we have done everything we can in this game.");
+	 			try{
+	 				Thread.sleep(30000);
+	 			} catch(Exception e) {
+	 				e.printStackTrace();
+	 			}
+	 			toDoList.push(new Pair<String,Object>("survive", null));
+	 		}
+	 	}
+	 	connection.send("quit");
 	}
 	
 	public void login() {
@@ -51,27 +87,30 @@ public class Bisbat extends Thread {
 	}
 	
 	public void explore() {	
-		print("Starting exploration"); // debugger
+		debug("Starting exploration");
 		String otherExitDirection = "";
 		try {
-			while(true) {
-				//print("Explore loop entrance."); // debugger
-				//currentRoom.printTree(); // debugger
-				Exit chosenExit = currentRoom.getRandomUnexploredExit();
-				if(chosenExit == null) {
-					walkToRoomIfKnown(findRoomWithUnexploredExits());
-					chosenExit = currentRoom.getRandomUnexploredExit();
+			//currentRoom.printTree(); // debugger
+			Exit chosenExit = currentRoom.getRandomUnexploredExit();
+			if(chosenExit == null) {
+				Room findMe = findRoomWithUnexploredExits();
+				if(findMe == null) {
+					print("We have finished mapping the known universe.");
+					return;
 				}
-				connection.follow(chosenExit);
-				otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
-				chosenExit.nextRoom = roomFindingThread.pop();
-				Room previousRoom = currentRoom;
-				currentRoom = chosenExit.nextRoom;
-				//System.out.println("Other direction is: " + otherExitDirection + " and it should exist in the most recently found room."); // debugger
-				currentRoom.getExit(otherExitDirection).nextRoom = previousRoom;
-				//System.out.println("Printing Current Room: "); // debugger
-				//currentRoom.print(); // debugger
+				walkToRoomIfKnown(findMe);
+				chosenExit = currentRoom.getRandomUnexploredExit();
 			}
+			toDoList.push(new Pair<String,Object>("explore",null));
+			connection.follow(chosenExit);
+			otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
+			chosenExit.nextRoom = roomFindingThread.pop();
+			Room previousRoom = currentRoom;
+			currentRoom = chosenExit.nextRoom;
+			//System.out.println("Other direction is: " + otherExitDirection + " and it should exist in the most recently found room."); // debugger
+			currentRoom.getExit(otherExitDirection).nextRoom = previousRoom;
+
+			
 		} catch(NullPointerException e) {
 			System.err.println("Null Pointer\nCurrent Room Title: " + currentRoom.title + " otherExitDirection:" + otherExitDirection);
 			e.printStackTrace();
@@ -79,7 +118,7 @@ public class Bisbat extends Thread {
 			System.err.println("Error in random walk"); 
 			e.printStackTrace();
 		} 
-		print("Done exploration"); // debugger
+		//debug("Done exploration");
 	}
 	
 	public Room findRoomWithUnexploredExits() {
@@ -140,6 +179,9 @@ public class Bisbat extends Thread {
 			System.out.println("We had a wee bit of trouble searching for the path between two rooms. OUT OF MEMORY!");
 		}
 		//System.out.println("Following a path from " + currentRoom.title + " to  " + walkMeToHere.title); // debugger
+		if(path == null) {
+			throw new NullPointerException("Couldn't find a path to desired room.");
+		}
 		for(Exit e : path) {
 			connection.follow(e);
 			roomFindingThread.pop(false);
@@ -156,9 +198,9 @@ public class Bisbat extends Thread {
 	}
 	
 	public void addKnowledgeOf(Being b) {
-		if(!knwonBeingList.contains(b)) {
-			//considerAndGuessName(b);
-			knwonBeingList.add(b);
+		if(!knownBeingList.contains(b)) {
+			knownBeingList.add(b);
+			toDoList.push(new Pair<String,Object>("consider", b));
 		}
 	}
 
@@ -184,6 +226,10 @@ public class Bisbat extends Thread {
     static public void print(String string) {
     	cal = new GregorianCalendar();
         System.out.println("(" + cal.getTime().toString() + ") "  + string);
+    }
+    
+    static public void debug(String string) {
+    	System.out.println(string);
     }
 	
 	/**
