@@ -31,7 +31,7 @@ public class RecieveGameOutput extends Thread {
 						handleOutput(buffer);
 						buffer = "";
 					} else {
-						buffer += line;
+						buffer += line + "\n";
 						//System.out.println("Line(' " + line + " ' != '"  + bisbat.getPromptMatch()+ "'."); // debugger
 					}
 					//System.out.println("<-" + line); //print game output
@@ -61,12 +61,12 @@ public class RecieveGameOutput extends Thread {
 	public void handleOutput(String string) {
 		//Bisbat.print("handling output"); // debugger
 		//System.out.println(string); // debugger
-		Pattern roomPattern = Pattern.compile(".*<>(.*)<>(.*)Exits:([^\\.]*)\\.(.*)$" );
+		Pattern roomPattern = Pattern.compile(".*<>(.*)<>(.*)Exits:([^\\.]*)\\.(.*)$" , Pattern.MULTILINE | Pattern.DOTALL);
 		Matcher roomMatcher = roomPattern.matcher(string);
 		
 		//System.out.println("Considering if '" + string + "' is a room."); // debugger
 		if(roomMatcher.matches()) {
-			//System.out.println("~~~~~ Found a Room! ~~~~~"); // debugger
+			//Bisbat.debug("~~~~~ Found a Room! ~~~~~");
 			String title = roomMatcher.group(1);
 			String description =roomMatcher.group(2);
 			String exits = roomMatcher.group(3);
@@ -78,7 +78,6 @@ public class RecieveGameOutput extends Thread {
 			Vector<Item> items = new Vector<Item>();
 			
 			for(String occupant : roomOccupants) {
-				//System.out.println("occupant:" + occupant);
 				if(occupant.startsWith("M:")) {
 					Being b = new Being(occupant.substring(2));
 					beings.add(b);
