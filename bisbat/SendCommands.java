@@ -30,19 +30,19 @@ public class SendCommands extends Thread {
 			while (true) {
 					if(command.equals("exit")) {
 						throw(new NullPointerException());
-					} else if(command.equals("printTree")) {
+					} else if(command.equalsIgnoreCase("printTree")) {
 						bisbat.currentRoom.printTree();
+					} else if(command.equalsIgnoreCase("printToDo")) {
+						Bisbat.print(bisbat.toDoList.toString());
 					} else {
 						out.println(command);
 					}
 					command = reader.readLine();
 			}
 			
-		} catch (IOException ioe) {
-			System.err.println("PrintInput Failed");
-			ioe.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		} catch (NullPointerException e) {
-			System.err.println("Null pointer in Send Commands"); 
 			e.printStackTrace();
 		}
 		out.println(command);
