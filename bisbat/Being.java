@@ -38,13 +38,25 @@ public class Being {
 			return names[guessLocation];
 		}
 	}
-	
+	public boolean setGuessResult(String result) {
+		if(result.startsWith("You don't see that here.")) {
+			setGuessResult(false);
+			return false;
+		} else {
+			setGuessResult(true);
+			return true;
+		}
+	}
 	public void setGuessResult(boolean sucess) {
 		if(sucess) {
 			if(guessMode == 0) {
 				guessMode = 1;
 			} else if(guessMode == 1) {
 				name = longDesc.split(" ")[guessLocation];
+				if(name.length() < 4) {
+					guessMode = 0;
+					guessLocation++;
+				}
 			}
 		} else {
 			if(guessMode == 0) {
