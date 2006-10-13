@@ -9,5 +9,11 @@ public class Pair<A,B> {
 		left = a;
 		right = b;
 	}
+	public String toString() {
+		return "<" + (left != null ? left.toString() : "") + "," + (right != null ? right.toString() : "") + ">";
+	}
+	public boolean equals (Pair p) {
+		return (p.left.equals(left) && p.right.equals(right));
+	}
 	
 }
