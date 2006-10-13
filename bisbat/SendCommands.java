@@ -23,6 +23,10 @@ public class SendCommands extends Thread {
 		String command = null;
 		try {
 			command = reader.readLine();
+			if(command == null) {
+				// Connection was severed.
+				return;
+			}
 			while (true) {
 					if(command.equals("exit")) {
 						throw(new NullPointerException());
@@ -38,7 +42,7 @@ public class SendCommands extends Thread {
 			System.err.println("PrintInput Failed");
 			ioe.printStackTrace();
 		} catch (NullPointerException e) {
-			System.err.println("Null pointer in Send Commands"); // We are probably done
+			System.err.println("Null pointer in Send Commands"); 
 			e.printStackTrace();
 		}
 		out.println(command);

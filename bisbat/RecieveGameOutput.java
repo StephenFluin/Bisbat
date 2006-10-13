@@ -27,7 +27,7 @@ public class RecieveGameOutput extends Thread {
 					line = decolor(line);
 					if(line.matches(bisbat.getPromptMatch())) {
 						//Handle the buffer then clear it.
-						System.out.println("Found the prompt!  Handling contents of buffer."); // debugger
+						//System.out.println("Found the prompt!  Handling contents of buffer."); // debugger
 						handleOutput(buffer);
 						buffer = "";
 					} else {
@@ -66,7 +66,7 @@ public class RecieveGameOutput extends Thread {
 		
 		//System.out.println("Considering if '" + string + "' is a room."); // debugger
 		if(roomMatcher.matches()) {
-			System.out.println("~~~~~ Found a Room! ~~~~~"); // debugger
+			//System.out.println("~~~~~ Found a Room! ~~~~~"); // debugger
 			String title = roomMatcher.group(1);
 			String description =roomMatcher.group(2);
 			String exits = roomMatcher.group(3);
@@ -78,7 +78,7 @@ public class RecieveGameOutput extends Thread {
 			Vector<Item> items = new Vector<Item>();
 			
 			for(String occupant : roomOccupants) {
-				System.out.println("occupant:" + occupant);
+				//System.out.println("occupant:" + occupant);
 				if(occupant.startsWith("M:")) {
 					Being b = new Being(occupant.substring(2));
 					beings.add(b);

@@ -157,7 +157,7 @@ public class Bisbat extends Thread {
 	
 	public void addKnowledgeOf(Being b) {
 		if(!knwonBeingList.contains(b)) {
-			considerAndGuessName(b);
+			//considerAndGuessName(b);
 			knwonBeingList.add(b);
 		}
 	}
