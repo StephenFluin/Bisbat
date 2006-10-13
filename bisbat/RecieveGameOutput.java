@@ -1,5 +1,3 @@
-/** NightShade */ /* Aug 14, 2006 */
-
 package bisbat;
 
 import java.io.*;
@@ -8,7 +6,6 @@ import java.util.Vector;
 import java.util.regex.*;
 
 public class RecieveGameOutput extends Thread {
-	/* Thread: constantly prints a given input stream */
 	
 	private BufferedReader reader;
 	private Bisbat bisbat;
@@ -22,54 +19,52 @@ public class RecieveGameOutput extends Thread {
 		String line = "Starting PrintSteam";
 		String buffer = "";
 		while (line != null){
-			try {
-				
+			try {	
 				line = reader.readLine();
-				
 				if(line == null) {
-					// Then we are done reading lines (output from game is closed.)
-					return;
+					return; // done reading lines game output is closed
 				} else if(!line.equals("")) {
 					line = decolor(line);
-					
 					if(line.matches(bisbat.getPromptMatch())) {
 						//Handle the buffer then clear it.
-						System.out.println("Found the prompt!  Handling contents of buffer.");
+						System.out.println("Found the prompt!  Handling contents of buffer."); // debugger
 						handleOutput(buffer);
 						buffer = "";
 					} else {
 						buffer += line;
-						//System.out.println("Line(' " + line + " ' != '"  + bisbat.getPromptMatch()+ "'.");
+						//System.out.println("Line(' " + line + " ' != '"  + bisbat.getPromptMatch()+ "'."); // debugger
 					}
-					System.out.println("<-" + line);
-					
+					//System.out.println("<-" + line); //print game output
 				}
-				
 			} catch (SocketException e) {
+				System.err.println("Socket failed");
+				e.printStackTrace();
 				return;
 			} catch (IOException e) {
 				System.err.println("PrintSteam failed");
 				e.printStackTrace();
+				return;
 			}
 		}
 	}
-	
-	// Eliminates color information sent from the game.  We may 
-	// want to remove this later (or just change the color info to 
-	// something readable).
-	public String decolor(String s) {
-	    char ESCAPE = '\033';
-        s = s.replaceAll(ESCAPE + "\\[[01];[0-9][0-9]m", "");
-        
 
-        return s;
+	/**
+	 * Eliminates color information sent from the game.
+	 * @param string: string to be de-colored
+	 */
+	public String decolor(String string) {
+	    char ESCAPE = '\033';
+	    string = string.replaceAll(ESCAPE + "\\[[01];[0-9][0-9]m", "");
+        return string;
 	}
-	public void handleOutput(String s) {
-		// Load info into a room if found.
-		//Bisbat.print("handling output");
-		//System.out.println(s);
+	
+	public void handleOutput(String string) {
+		//Bisbat.print("handling output"); // debugger
+		//System.out.println(string); // debugger
 		Pattern roomPattern = Pattern.compile(".*<>(.*)<>(.*)Exits:([^\\.]*)\\.(.*)$" );
-		Matcher roomMatcher = roomPattern.matcher(s);
+		Matcher roomMatcher = roomPattern.matcher(string);
+		
+		//System.out.println("Considering if '" + string + "' is a room."); // debugger
 		if(roomMatcher.matches()) {
 			System.out.println("~~~~~ Found a Room! ~~~~~"); // debugger
 			String title = roomMatcher.group(1);
@@ -78,9 +73,10 @@ public class RecieveGameOutput extends Thread {
 			String beingsAndObjects = roomMatcher.group(4);
 			
 			String[] roomOccupants = beingsAndObjects.split("\n");
-			//System.out.println("Beings and objects = '" + beingsAndObjects + "'.");
+			//System.out.println("Beings and objects = '" + beingsAndObjects + "'."); // debugger
 			Vector<Being> beings = new Vector<Being>();
 			Vector<Item> items = new Vector<Item>();
+			
 			for(String occupant : roomOccupants) {
 				System.out.println("occupant:" + occupant);
 				if(occupant.startsWith("M:")) {
@@ -93,15 +89,16 @@ public class RecieveGameOutput extends Thread {
 					bisbat.addKnowledgeOf(i);
 				}
 			}
-			
-			
+
 			Room recentlyDiscoveredRoom = new Room(title, description, exits, beings, items);
 			bisbat.foundRoom(recentlyDiscoveredRoom);
+			
 		} else {
-			System.out.println("<--" + s);
-			bisbat.resultQueue.add(s);
+			//System.out.println("~~~~~ Not a Room! ~~~~~"); // debugger
+			System.out.println("<--" + string); // print non-room recieved game information
+			bisbat.resultQueue.add(string);
 		}
-		//Bisbat.print("Done handlign output.");
+		//Bisbat.print("Done handling output."); // debugger
 	}
 }
 

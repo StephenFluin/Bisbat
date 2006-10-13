@@ -10,23 +10,22 @@ public class Exit {
 	public Room nextRoom; // null if unknown
 	public String direction;
 	
-	
 	/**
 	 * Constructs an exit.
-	 * @param s The direction of the exit.
+	 * @param dir: The direction of the exit.
 	 */
-	public Exit(String s) {
-		s = s.trim().toLowerCase(); // "West" != "west"
-		if (s.charAt(0) == '[' || s.charAt(0) == '<') {
+	public Exit(String dir) {
+		dir = dir.trim().toLowerCase(); // since "West" != "west"
+		if (dir.charAt(0) == '[' || dir.charAt(0) == '<') {
 			isDoor = true;
-			if (s.charAt(0) == '['){
+			if (dir.charAt(0) == '['){
 				isDoorOpen = false;
 			} else {isDoorOpen = true;}
-			direction = s.substring(1, (s.length() - 1));
+			direction = dir.substring(1, (dir.length() - 1));
 		} else {
-			direction = s;
+			direction = dir;
 			isDoor = false;
-			isDoorOpen = true; // opperates like an open door
+			isDoorOpen = true;
 		}
 	}
 	
@@ -37,11 +36,13 @@ public class Exit {
 			return null;
 		}
 	}
+	
 	public String getDirection() {
 		return direction;
 	}
+	
 	public static String getOpposite(String command) {
-		//System.out.println("Finding the opposite of " + command);
+		//System.out.println("Finding the opposite of " + command); // debugger
 		if(command.equals("west")) return "east";
 		if(command.equals("east")) return "west";
 		if(command.equals("north")) return "south";
@@ -61,17 +62,16 @@ public class Exit {
 		ArrayList<String> directionList = new ArrayList<String>();
 
 		for(Exit e : path) {
-			
 			direction = e.getDirection();
 			if((direction.length() > 6) && (direction.contains("east") || direction.contains("west"))) {
 				directionList.add(direction.substring(0,5));
 				directionList.add(direction.substring(5));
 			} else {
 				directionList.add(direction);
-				//System.out.println("Adding single direction to list:" + direction);
+				//System.out.println("Adding single direction to list:" + direction); // debugger
 			}
-			
 		}
+		
 		for(String dir : directionList) {
 			try{
 				if(exitList.containsKey(dir) || exitList.containsKey(Exit.getOpposite(dir))) {
@@ -84,30 +84,26 @@ public class Exit {
 					exitList.put(dir, 1);
 				}
 			} catch (NullPointerException e) {
-				System.out.println("dir='" + dir + "', opDir ='" + Exit.getOpposite(dir) + "'.");
+				System.err.println("dir='" + dir + "', opDir ='" + Exit.getOpposite(dir) + "'.");
 				e.printStackTrace();
 			}
 		}
 		
-		double result = 0.0f;
+		double result = 0.0d;
 		for(String s: exitList.keySet()) {
 			int distance = exitList.get(s);
-			//System.out.println("Distance for " + s + " was " + distance + ".");
-			result += distance*distance;
-			
+			//System.out.println("Distance for " + s + " was " + distance + "."); // debugger
+			result += distance * distance;
 		}
 		result = Math.sqrt(result);
-		//System.out.println("We just did some cool spatial calculations, and we got: " + result );
-		try{
-			//Thread.sleep(300);
-		} catch(Exception e) {
-			
-		}
-		/*System.out.print("FYI, that was from path: ");
+		//System.out.println("We just did some cool spatial calculations, and we got: " + result ); // debugger
+		
+		/* // debugger
+		System.out.print("FYI, that was from path: "); 
 		for(Exit e : path) {
 			System.out.print(e.getDirection() + ", ");
-		}
-		System.out.println();*/
+		System.out.println();
+		*/
 		return result;
 	}
 	

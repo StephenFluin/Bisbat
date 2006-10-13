@@ -15,9 +15,8 @@ public class Room {
 		}
 		beings = Beings;
 		items = Items;
-
-		
 	}
+	
 	public ArrayList<Exit> exits = new ArrayList<Exit>();
 	public String description = new String();
 	public String title = new String();
@@ -29,7 +28,8 @@ public class Room {
 	 * Returns true if this room is indistinguishable from given room.
 	 */
 	public boolean matchesRoom(Room room) {
-		/*System.out.println("Findy room:");
+		/* //debugger
+		System.out.println("Findy room:");
 		room.print();
 		System.out.println("This room:");
 		print();
@@ -53,23 +53,18 @@ public class Room {
 				return false;
 			}
 		}
-		
-		
-		
 		/*
 		 Should check adjacent rooms for difference too
 		 Possibly a depth limited breadth first search
 		 Without this, Bisbat will probably fail when presented with identical rooms
 		*/
-		// can't find a difference
-		return true; 
+		return true; // can't find a difference
 	}
 	
 	/** 
 	 * updates information about the current state of this room 
 	 * using the given room.
-	 * 
-	 * @param room A room that has the update information about doors, items, and beings.
+	 * @param room: A room that has the update information about doors, items, and beings.
 	 */
 	public boolean update(Room room) {
 		if (!matchesRoom(room)) return false; //rooms don't match
@@ -85,7 +80,6 @@ public class Room {
 		return true; 
 	}
 	
-	
 	/**
 	 * prints a string representation to system.out 
 	 * !TODO this is a debugging method
@@ -94,6 +88,7 @@ public class Room {
 		System.out.println(toString());
 		System.out.print("\n");		
 	}
+	
 	public String toString() {
 		String result = "TITLE:" + title + "\nDESCRIPTION:" + description + "\n";
 		for(Exit e : exits) {
@@ -104,18 +99,13 @@ public class Room {
 	
 	Exit getRandomUnexploredExit() {
 		ArrayList<Exit> une = getUnexploredExits();
-
-		
 		if(une.size() == 0) {
-			// Now we have finished this room, we need to go to another room that has unexplored exits.
-			//System.out.println("Finished exploring this room.");
-			return null;
+			//System.out.println("Finished exploring this room."); // debugger
+			return null; // all exits from this room have been explored
 		}
-		
-		return une.get((int)Math.round(Math.random() * (une.size() -1)));
-		//return getExit((int)Math.round(Math.random() * (exits.size() - 1)));
-		
+		return une.get((int)Math.round(Math.random() * (une.size() -1)));		
 	}
+	
 	Exit getExit(int i) {
 		return exits.get(i);
 		
@@ -128,23 +118,12 @@ public class Room {
 		}
 		return null;
 	}
-	/*void printTree(String tabs, ArrayList<Room> exploredRooms) {
-		if(!exploredRooms.contains(this)) {
-			exploredRooms.add(this);
-			System.out.println(tabs + this.title + "(" + getUnexploredExits().size() + ")");
-			for(Exit e: exits) {
-				if(e.nextRoom != null) {
-					e.nextRoom.printTree(tabs + "  ", exploredRooms);
-				}
-			}
-			
-		}
-	}
-	void printTree() {	
-		ArrayList<Room> explored = new ArrayList<Room>();
-		printTree("", explored);
-	}*/
-	
+
+	/**
+	 * Prints a tree representation of the mapped world from current location.
+	 * Rooms found with a bredth-first-search from current room.
+	 * Printed in depth-first-search reprentation for more a more intuitive mapping. !TODO
+	 */
 	void printTree(){
 		int counter = 0;
 		LinkedList<Room> exploredRooms = new LinkedList<Room>();
@@ -156,7 +135,9 @@ public class Room {
 			if(!exploredRooms.contains(currentPair.left)) {
 				counter++;
 				exploredRooms.add(currentPair.left);
-				System.out.println(currentPair.right + currentPair.left.title + "(" + currentPair.left.getUnexploredExits().size() + "/" + currentPair.left.exits.size() + ")");
+				System.out.println(currentPair.right + currentPair.left.title + "(" 
+						+ currentPair.left.getUnexploredExits().size() + "/"
+						+ currentPair.left.exits.size() + ")"); // debugger
 				for(Exit e : currentPair.left.exits) {
 					if(e.nextRoom != null) {
 						searchQueue.add(new Pair<Room,String>(e.nextRoom, currentPair.right + "  "));
@@ -164,8 +145,8 @@ public class Room {
 				}
 			}
 		}
-		System.out.println("Total rooms:" + counter);
 		
+		System.out.println("Total rooms:" + counter); // debugger
 	}
 
 	public ArrayList<Exit> getUnexploredExits() {
@@ -177,7 +158,5 @@ public class Room {
 		}
 		return une;
 	}
-	
-
 	
 }

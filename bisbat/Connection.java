@@ -1,13 +1,9 @@
-/** NightShade */ /* Aug 14, 2006 */
-
 package bisbat;
 
 import java.io.*;
 import java.net.*;
 
 public class Connection {
-	/* Opens a connection to a socket
-	 * Prints input to/from system and socket */
 	
 	private Socket socket;
 	private RecieveGameOutput in;
@@ -30,23 +26,25 @@ public class Connection {
 		in.start();
 		out.start();
 	}
+	
 	public void send(String s) {
 		if(s == null) {
 			System.out.println("The string I am trying ot send is null.");
 		}
 		out.send(s);
 	}
+	
 	public void sendNavigation(String command) {
 		send(command);
 		bisbat.roomFindingThread.add(command);
 	}
+	
 	public void follow(Exit chosenExit) {
-		String dCommand = chosenExit.getDoorCommand();
-		if(dCommand != null) {
-			send(dCommand);
+		String doorCommand = chosenExit.getDoorCommand();
+		if(doorCommand != null) {
+			send(doorCommand);
 		}
 		sendNavigation(chosenExit.direction);
-		
-		
 	}
+	
 }

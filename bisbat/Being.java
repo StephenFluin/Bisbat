@@ -3,11 +3,13 @@ package bisbat;
 import java.util.Vector;
 
 public class Being {
+	
 	public String name, shortDesc, longDesc;
 	public int hp, maxhp;
 	public Vector<Integer> damageHistory;
 	public Vector<Room> seenIn;
 	public int guessLocation = 0;
+	
 	/**
 	 * Four modes:
 	 * 0. single character guesses
@@ -16,6 +18,7 @@ public class Being {
 	 * 3. guesses from room description (unimplmeented yet)
 	 */
 	public int guessMode = 0;
+	
 	public Being(String string) {
 		longDesc = string;
 	}
@@ -35,6 +38,7 @@ public class Being {
 			return names[guessLocation];
 		}
 	}
+	
 	public void setGuessResult(boolean sucess) {
 		if(sucess) {
 			if(guessMode == 0) {
@@ -55,7 +59,6 @@ public class Being {
 				}
 			}
 		}
-		
 	}
 
 }

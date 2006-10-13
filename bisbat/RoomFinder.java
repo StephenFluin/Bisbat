@@ -1,65 +1,66 @@
 package bisbat;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.LinkedList;;
 
 public class RoomFinder extends Thread {
 	
-	
-	
 	private LinkedList<Room> foundRooms;
 	private LinkedList<String> commandList;
 	private Bisbat bisbat = null;
-	public RoomFinder(Bisbat b) {
-		bisbat = b;
+	
+	public RoomFinder(Bisbat bisbat) {
+		this.bisbat = bisbat;
 	}
+	
 	public void start() {
 		foundRooms = new LinkedList<Room>();
 		commandList = new LinkedList<String>();
 	}
-	public void add(Room r) {
-		foundRooms.add(r);
+	
+	public void add(Room room) {
+		foundRooms.add(room);
 		
 	}
 	public void add(String command) {
 		commandList.add(command);
 	}
+	
 	public Room popFirstRoom() {
 		commandList.removeFirst();
 		return foundRooms.removeFirst();
 	}
+	
 	public Room pop() {
 		return pop(true);
 	}
+	
 	public Room pop(boolean discovering) {
-		//Bisbat.print("Waiting for a room.");
+		//Bisbat.print("Waiting for a room."); // debugger
 		while(foundRooms.size() <= 0) {
-			
 			try {
 				Thread.sleep(100); // Optimize with semaphores? !TODO
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
-		//Bisbat.print("F0und a room to pop.");
+		//Bisbat.print("Found a room to pop."); // debugger
 		if(!discovering) {
 			return popFirstRoom();
-
 		}
 		if(bisbat.currentRoom == null) {
-			bisbat.currentRoom = foundRooms.getFirst();
+			bisbat.currentRoom = foundRooms.getFirst(); // look at me !TODO replace with removeFirst()?
 		} else {
-			Room tmp = searchForMatchingRoom(bisbat.currentRoom, foundRooms.getFirst(), commandList.getFirst(), discovering);
-			if(tmp != null) {
-				//System.out.println("We found a room that matched!  Replacing " + foundRooms.getFirst().title + " with " + tmp.title);
+			Room temp = searchForMatchingRoom(bisbat.currentRoom, foundRooms.getFirst(), 
+					commandList.getFirst(), discovering);
+			if(temp != null) {
+				// System.out.println("We found a room that matched!  Replacing " + foundRooms.getFirst().title + " with " + tmp.title); // debugger
 				foundRooms.removeFirst();
-				foundRooms.addFirst(tmp);
+				foundRooms.addFirst(temp);
 			} else {
-				//System.out.println("We didn't find a room that matched: " + foundRooms.getFirst().title);
+				//System.out.println("We didn't find a room that matched: " + foundRooms.getFirst().title); // debugger
 			}
 		}
-		
 		return popFirstRoom(); // get first does not "pop" the list
 	}
 	
@@ -69,12 +70,11 @@ public class RoomFinder extends Thread {
 	 *  it has to be at least 2 away, and its spacial relativity must be less than 2.
 	 */
 	static public Room searchForMatchingRoom(Room indexRoom, Room findMe, String command, boolean discovering) {
-		//Bisbat.print("searching for matching room");
+		//Bisbat.print("searching for matching room"); // debugger
 		
 		LinkedList<Room> exploredRooms = new LinkedList<Room>();
 		LinkedList<Room> searchQueue = new LinkedList<Room>();
 		ArrayList<Exit> path;
-		
 		searchQueue.add(indexRoom);
 		
 		while(searchQueue.size() > 0) {
@@ -83,27 +83,25 @@ public class RoomFinder extends Thread {
 				exploredRooms.add(currentRoom);
 				
 				//!TODO - Check for orthogonol room matches (grid areas).
-				/*************** DO THIS FOR EVERY ROOM IN THE SEARCH QUEUE */
+				/*************** DO THIS FOR EVERY ROOM IN THE SEARCH QUEUE ***************/
 				
 				if( currentRoom.matchesRoom(findMe) ) {
-					//System.out.println("We matched " + findMe.title + " and " + currentRoom.title + " -- BUT THIS IS WRONG!");
+					//System.out.println("We matched " + findMe.title + " and " + currentRoom.title + " -- BUT THIS IS WRONG!"); // debugger
 					path = searchForPathBetweenRooms(indexRoom, currentRoom);
 					path.add(0,new Exit(Exit.getOpposite(command)));
 					if(path.size() > 2) {
 						if(Exit.spatialRelativityCalculation(path) < .99) {
-							//Bisbat.print("Found a room that matched.");
+							//Bisbat.print("Found a room that matched."); // debugger
 							return currentRoom;
 						} else {
-							//System.out.println("Probably was too far away.");
+							//System.out.println("Probably was too far away."); // debugger
 						}
-
 					} else {
-						//System.out.println("It wasn't far enough away to be the same.");
+						//System.out.println("It wasn't far enough away to be the same."); // debugger
 					}
 				} else {
-					//System.out.println("Didn't match because it didn't look the same.");
+					//System.out.println("Didn't match because it didn't look the same."); // debugger
 				}
-				
 				
 				for(Exit e : currentRoom.exits) {
 					if(e.nextRoom != null) {
@@ -111,25 +109,34 @@ public class RoomFinder extends Thread {
 						searchQueue.add(e.nextRoom);
 					}
 				}
-				/*************** STOP DOING THIS FOR EVERY ROOM IN THE SEARCH QUEUE */
-
+				
+				/*************** STOP DOING THIS FOR EVERY ROOM IN THE SEARCH QUEUE ***************/
 			}
-			
 		}
-		//Bisbat.print("Didn't find a room that matched.");
+		//Bisbat.print("Didn't find a room that matched."); // debugger
 		return null;
 	}
 	
-	static public ArrayList<Exit> searchForPathBetweenRooms(Room start, Room dest) {
-		return searchForPathBetweenRooms(start, dest, new ArrayList<Exit>(), new ArrayList<Room>());
+	/**
+	 * Finds a path between two rooms
+	 * @param start: intial room in search for destination room
+	 * @param destination: destination room
+	 */
+	static public ArrayList<Exit> searchForPathBetweenRooms(Room start, Room destination) {
+		return searchForPathBetweenRooms(start, destination, new ArrayList<Exit>(), new ArrayList<Room>());
 	}
 	
 	/**
-	 * Depth-First-Search for a path between two rooms.
+	 * recursive method that returns path between two rooms
+	 * @param start: current room in search for destination room
+	 * @param destination: destination room
+	 * @param path: path from initial room to current room
+	 * @param explored: list of already exlpored rooms (avoid duplicate checks)
 	 */
-	static public ArrayList<Exit> searchForPathBetweenRooms(Room start, Room dest, ArrayList<Exit> path, ArrayList<Room> explored) {
+	@SuppressWarnings("unchecked")
+	static public ArrayList<Exit> searchForPathBetweenRooms(Room start, Room destination, ArrayList<Exit> path, ArrayList<Room> explored) {
 		explored.add(start);
-		if(start == dest) {
+		if(start == destination) {
 			return path;
 		} else {
 			
@@ -137,12 +144,13 @@ public class RoomFinder extends Thread {
 				if(e.nextRoom != null && !explored.contains(e.nextRoom)) {
 					ArrayList<Exit> nPath = (ArrayList<Exit>)path.clone();
 					nPath.add(e);
-					ArrayList<Exit> tmp = searchForPathBetweenRooms(e.nextRoom, dest, nPath, explored);
-					if (tmp != null) {
-						return tmp;
+					ArrayList<Exit> temp = searchForPathBetweenRooms(e.nextRoom, destination, nPath, explored);
+					if (temp != null) {
+						return temp;
 					}
 				}
 			}
+			
 		}
 		return null;
 	}

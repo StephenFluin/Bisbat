@@ -1,22 +1,16 @@
-/** NightShade */ /* Aug 14, 2006 */
-
 package bisbat;
 
 import java.io.*;
 import java.net.*;
 
 public class SendCommands extends Thread {
-	/* Thread: Constantly prints user input to socket */
 	
-	private Socket socket;
 	private BufferedReader reader;
 	PrintWriter out;
 	public Bisbat bisbat;
 	
-
-	public SendCommands(Socket s, Bisbat b) {
-		bisbat = b;
-		socket = s;
+	public SendCommands(Socket socket, Bisbat bisbat) {
+		this.bisbat = bisbat;
 		try {
 			reader = new BufferedReader(new InputStreamReader(System.in));
 			out = new PrintWriter(socket.getOutputStream(), true);
@@ -28,9 +22,7 @@ public class SendCommands extends Thread {
 	public void run() {
 		String command = null;
 		try {
-			
 			command = reader.readLine();
-			
 			while (true) {
 					if(command.equals("exit")) {
 						throw(new NullPointerException());
@@ -46,15 +38,16 @@ public class SendCommands extends Thread {
 			System.err.println("PrintInput Failed");
 			ioe.printStackTrace();
 		} catch (NullPointerException e) {
+			System.err.println("Null pointer in Send Commands"); // We are probably done
 			e.printStackTrace();
-			// We are probably done, ;)
 		}
 		out.println(command);
 	}
+	
 	public void send(String s) {
 		out.write(s + "\n");
 		out.flush();
-		System.out.print("->" + s + "\n");
+		System.out.print("-> " + s + "\n");
 	}
 
 }
