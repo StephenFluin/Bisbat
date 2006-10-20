@@ -1,0 +1,18 @@
+Attach new room to exit from previous room (confirmed exit).
+
+Is there an exit with opposite direction than direction just traveled?
+	Yes: Construct unconfirmed exit to previous room.
+Search state space for all matching rooms that is at least 2 exits away.
+	No Matches: Construct new room.
+	Matches: Construct hypothesis list of all possibly matching rooms.
+		Hypothesis testing: Take a confirmed exit (do not loose current room)
+		Were all hypotheses false?
+			Yes: Construct new room, return to current room.
+			No: Discredit all hpotheses proven false.
+				Construct new hypothetical room connected to current room.
+				Repeat 3 times after reduction to single hypothesis, 
+					using previous hypothetical rooms to disprove original hypothesis. 
+
+
+
+     
