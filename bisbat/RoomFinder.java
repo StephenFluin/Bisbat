@@ -6,7 +6,7 @@ import java.util.LinkedList;;
 public class RoomFinder extends Thread {
 	
 	private LinkedList<Room> foundRooms;
-	private LinkedList<String> commandList;
+	public LinkedList<String> commandList;
 	private Bisbat bisbat = null;
 	
 	public RoomFinder(Bisbat bisbat) {
