@@ -35,12 +35,13 @@ public class Bisbat extends Thread {
 		roomFindingThread = new RoomFinder(this);
 		roomFindingThread.start();
 		resultQueue  = new ResultQueue();
+	 	toDoList = new Stack<Pair<String,Object>>();
 	}
 
 	public void run() {
 		connection = new Connection(this, "www.mortalpowers.com", 4000);
 	 	login();
-	 	toDoList = new Stack<Pair<String,Object>>();
+
 	 	toDoList.push(new Pair<String,Object>("survive", null));
 	 	toDoList.push(new Pair<String,Object>("explore", null));
 	 	while(toDoList.size() > 0) {
@@ -53,6 +54,16 @@ public class Bisbat extends Thread {
 	 				connection.send("consider " + b.guessName());
 	 				debug("Considering a mobile");
 	 				String result = resultQueue.pop();
+	 				
+	 				// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
+	 				while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
+	 					debug("Dumping: " + result + " because it didn't match anything we were looking for.");
+	 					if(result.contains("much tougher than you.")) debug("Much tougher than you matched.");
+	 					if(result.contains("tough as you.")) debug("Tough as you matched.");
+	 					if(result.contains("You are much")) debug("You matched.");
+	 					result = resultQueue.pop();
+	 				}
+	 					
 	 				if(!b.setGuessResult(result)) {
 	 					toDoList.push(new Pair<String,Object>("consider", b));
 	 				} else {
@@ -198,27 +209,15 @@ public class Bisbat extends Thread {
 	}
 	
 	public void addKnowledgeOf(Being b) {
+		if(b == null) {
+			debug("You are trying to add knowledge of anull, this is a problem.");
+		}
 		if(!knownBeingList.contains(b)) {
 			knownBeingList.add(b);
 			toDoList.push(new Pair<String,Object>("consider", b));
 		}
 	}
 
-	// look at me!
-	private void considerAndGuessName(Being being) {
-		System.out.println("COnsidering and GUessing! V2.0"); // debugger
-		while(!being.isSureOfName()) {
-			connection.send("consider " + being.guessName());
-			String result = resultQueue.pop();
-			if(result.equals("You don't see that here.")) {
-				being.setGuessResult(false);
-			} else {
-				being.setGuessResult(true);
-			}
-		}
-		
-	}
-	
 	/**
 	 * Prints the time with given string
 	 * @param string: prints this string along with the current time
