@@ -23,11 +23,12 @@ public class Being {
 		longDesc = string;
 	}
 	public boolean equals(Being other) {
+		Bisbat.debug("checking to see if mob is equal to another.");
 		return longDesc.equalsIgnoreCase(other.longDesc);
 	}
 	
 	public boolean isSureOfName() {
-		return (name!=null && name.length() > 3);
+		return (name!=null && name.length() > 2);
 	}
 	
 	public String guessName() {
@@ -35,6 +36,9 @@ public class Being {
 		if(guessMode == 0) {
 			return names[guessLocation].substring(0,1);
 		} else {
+			if(guessLocation >= names.length) {
+				Bisbat.debug("We couldn't figure out the name of the mobile.  There is a chance she left us.");
+			}
 			return names[guessLocation];
 		}
 	}
