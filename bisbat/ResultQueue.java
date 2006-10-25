@@ -14,17 +14,24 @@ public class ResultQueue {
 		results.add(s);
 	}
 	
+	/**
+	 * Insert a command at the front of the queue.
+	 * @param s The command we are inserting.
+	 */
+	public void insert(String s) {
+		results.add(0,s);
+	}
 	public String pop() {
 		while(results.size() <= 0) {
 			try {
 				Thread.sleep(1000); // Optimize with semaphores? !TODO
-				System.out.println("We're caught right here, with results.size() = " + results.size());
+				//System.out.println("ResultQueue has been asked to pop, waiting for something to pop.");
 			} catch(Exception e) {
 				System.err.println("Failed in ResultQueue.pop()");
 				e.printStackTrace();
 			}
 		}
-		//Bisbat.print("Popping off: " + results.get(0)); // debugger
+		//Bisbat.debug("Pop> " + results.get(0)); // debugger
 		return results.remove(0);
 	}
 }
