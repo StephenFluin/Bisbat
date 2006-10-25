@@ -58,13 +58,15 @@ public class RecieveGameOutput extends Thread {
         return string;
 	}
 	
+	/**
+	 * Dispatch the output from the game to a room, data for 
+	 * bisbat to see, or the failure of a commands like move.
+	 * @param string The output from the game.
+	 */
 	public void handleOutput(String string) {
-		//Bisbat.print("handling output"); // debugger
-		//System.out.println(string); // debugger
 		Pattern roomPattern = Pattern.compile(".*<>(.*)<>(.*)Exits:([^\\.]*)\\.(.*)$" , Pattern.MULTILINE | Pattern.DOTALL);
 		Matcher roomMatcher = roomPattern.matcher(string);
-		
-		//System.out.println("Considering if '" + string + "' is a room."); // debugger
+
 		if(roomMatcher.matches()) {
 			//Bisbat.debug("~~~~~ Found a Room! ~~~~~");
 			String title = roomMatcher.group(1);
@@ -95,6 +97,26 @@ public class RecieveGameOutput extends Thread {
 		} else {
 			//System.out.println("~~~~~ Not a Room! ~~~~~"); // debugger
 			System.out.println("<--" + string); // print non-room recieved game information
+			if(string.contains("You are too tired to go there now.")) {
+				
+				try{
+					// BEWARE, this blocks the receive gameoutput thread, when it should be done in Bisbat (just not sure how to do that right now)
+					
+					Bisbat.print("Bisbat is sleeping because he was too tired to move right now.");
+					bisbat.connection.send("sleep");
+					Thread.sleep(20000);
+					//bisbat.toDoList.add(new Pair<String,Object>("sleep",20));
+					bisbat.connection.send("wake");
+					bisbat.connection.send(bisbat.roomFindingThread.commandList.getFirst());
+					//throw new Exception("testing");
+					
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+				
+				
+			} 
+			
 			bisbat.resultQueue.add(string);
 		}
 		//Bisbat.print("Done handling output."); // debugger
