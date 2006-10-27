@@ -24,7 +24,7 @@ public class ResultQueue {
 	public String pop() {
 		while(results.size() <= 0) {
 			try {
-				Thread.sleep(1000); // Optimize with semaphores? !TODO
+				Thread.sleep(100); // Optimize with semaphores? !TODO
 				//System.out.println("ResultQueue has been asked to pop, waiting for something to pop.");
 			} catch(Exception e) {
 				System.err.println("Failed in ResultQueue.pop()");
@@ -34,4 +34,6 @@ public class ResultQueue {
 		//Bisbat.debug("Pop> " + results.get(0)); // debugger
 		return results.remove(0);
 	}
+
+
 }
