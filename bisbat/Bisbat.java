@@ -44,6 +44,7 @@ public class Bisbat extends Thread {
 
 	 	toDoList.push(new Pair<String,Object>("survive", null));
 	 	toDoList.push(new Pair<String,Object>("explore", null));
+	 	outer:
 	 	while(toDoList.size() > 0) {
 	 		Pair<String,Object> toDoItem = toDoList.pop();
 	 		if(toDoItem.left.equals("explore")) {
@@ -57,10 +58,11 @@ public class Bisbat extends Thread {
 	 				
 	 				// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
 	 				while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
-	 					debug("Dumping: " + result + " because it didn't match anything we were looking for.");
-	 					if(result.contains("much tougher than you.")) debug("Much tougher than you matched.");
-	 					if(result.contains("tough as you.")) debug("Tough as you matched.");
-	 					if(result.contains("You are much")) debug("You matched.");
+	 					if(result.contains("leaves to the")) {
+	 						debug("Someone left the room and now I am all fuddled.");
+	 						continue outer;
+	 					}
+	 					//debug("Dumping: " + result + " because it didn't match anything we were looking for.");
 	 					result = resultQueue.pop();
 	 				}
 	 					
@@ -100,24 +102,32 @@ public class Bisbat extends Thread {
 		connection.send(name);
 		connection.send(password);
 		setUpPrompt();
-		resultQueue.pop();
+		
+		//We only need to do this if setUpPrompt() creates a non-prompt message from the game.
+		//resultQueue.pop();
+		
 		roomFindingThread.add("look");
 		currentRoom = roomFindingThread.pop();
 	}
 	
 	public void explore() {	
-		debug("Starting exploration");
+		//debug("Starting exploration");
 		String otherExitDirection = "";
 		try {
 			//currentRoom.printTree(); // debugger
 			Exit chosenExit = currentRoom.getRandomUnexploredExit();
+			
 			if(chosenExit == null) {
 				Room findMe = findRoomWithUnexploredExits();
 				if(findMe == null) {
 					print("We have finished mapping the known universe.");
 					return;
 				}
-				walkToRoomIfKnown(findMe);
+				boolean success = walkToRoomIfKnown(findMe);
+				if(!success) {
+					toDoList.push(new Pair<String,Object>("explore",null));
+					return;
+				}
 				chosenExit = currentRoom.getRandomUnexploredExit();
 			}
 			toDoList.push(new Pair<String,Object>("explore",null));
@@ -125,7 +135,7 @@ public class Bisbat extends Thread {
 			otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
 			chosenExit.nextRoom = roomFindingThread.pop();
 			if(chosenExit.nextRoom == null) {
-				print("Our exploration attempt failed, lets explore later.");
+				//print("Our exploration attempt failed, lets explore later.");
 				return;
 			}
 			
@@ -191,7 +201,7 @@ public class Bisbat extends Thread {
 	 * whenever we want to walk to a destination room.
 	 * @param walkMeToHere
 	 */
-	public void walkToRoomIfKnown(Room walkMeToHere) {
+	public boolean walkToRoomIfKnown(Room walkMeToHere) {
 		//System.out.println("We are walkToRoomIfKnown ing."); // debugger
 		//System.out.println("Current KB:"); // debugger
 		//currentRoom.printTree(); // debugger
@@ -208,10 +218,15 @@ public class Bisbat extends Thread {
 		}
 		for(Exit e : path) {
 			connection.follow(e);
-			roomFindingThread.pop(false);
+			Room r = roomFindingThread.pop(false);
+			if(r == null) {
+				//debug("Failure in speedwalk. I think we need to refollow.");
+				return false;
+			}
 			currentRoom = e.nextRoom;
 			//currentRoom.printTree(); // debugger
 		}
+		return true;
 		//System.out.println("Done following the path."); // debugger
 	}
 	
