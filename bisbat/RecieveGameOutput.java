@@ -27,7 +27,8 @@ public class RecieveGameOutput extends Thread {
 					line = decolor(line);
 					if(line.matches(bisbat.getPromptMatch())) {
 						//Handle the buffer then clear it.
-						//System.out.println("Found the prompt!  Handling contents of buffer."); // debugger
+						//Bisbat.debug("Found the prompt!  Handling contents of buffer."); // debugger
+						//Bisbat.debug(buffer);
 						handleOutput(buffer);
 						buffer = "";
 					} else {
@@ -97,29 +98,17 @@ public class RecieveGameOutput extends Thread {
 		} else {
 			//System.out.println("~~~~~ Not a Room! ~~~~~"); // debugger
 			string = string.trim();
-			System.out.println("'<--" + string + "'"); // print non-room recieved game information
+			 // print non-room recieved game information
 			if(string.contains("You are too tired to go there now.")) {
-				
-				try{
-					// BEWARE, this blocks the receive gameoutput thread, when it should be done in Bisbat (just not sure how to do that right now)
-					
-					Bisbat.print("Bisbat is sleeping because he was too tired to move right now.");
-
 					bisbat.toDoList.add(new Pair<String,Object>("sleep",20));
 					bisbat.roomFindingThread.failure();
 
-
-					
-					//throw new Exception("testing");
-					
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
+			} else if(string.length() < 1) {
 				
-				
-			} 
-			
-			bisbat.resultQueue.add(string);
+			} else {
+				System.out.println("'<--" + string + "'");
+				bisbat.resultQueue.add(string);
+			}
 		}
 		//Bisbat.print("Done handling output."); // debugger
 	}
