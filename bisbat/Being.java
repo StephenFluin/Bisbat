@@ -23,10 +23,16 @@ public class Being {
 		longDesc = string;
 	}
 	public boolean equals(Being other) {
-		Bisbat.debug("checking to see if mob is equal to another.");
+		//Bisbat.debug("checking to see if mob is equal to another.");
 		return longDesc.equalsIgnoreCase(other.longDesc);
 	}
-	
+	public boolean equals(Object other) {
+		if(other instanceof Being) {
+			return equals((Being)other);
+		} else {
+			return false;
+		}
+	}
 	public boolean isSureOfName() {
 		return (name!=null && name.length() > 2);
 	}

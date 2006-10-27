@@ -96,18 +96,20 @@ public class RecieveGameOutput extends Thread {
 			
 		} else {
 			//System.out.println("~~~~~ Not a Room! ~~~~~"); // debugger
-			System.out.println("<--" + string); // print non-room recieved game information
+			string = string.trim();
+			System.out.println("'<--" + string + "'"); // print non-room recieved game information
 			if(string.contains("You are too tired to go there now.")) {
 				
 				try{
 					// BEWARE, this blocks the receive gameoutput thread, when it should be done in Bisbat (just not sure how to do that right now)
 					
 					Bisbat.print("Bisbat is sleeping because he was too tired to move right now.");
-					bisbat.connection.send("sleep");
-					Thread.sleep(20000);
-					//bisbat.toDoList.add(new Pair<String,Object>("sleep",20));
-					bisbat.connection.send("wake");
-					bisbat.connection.send(bisbat.roomFindingThread.commandList.getFirst());
+
+					bisbat.toDoList.add(new Pair<String,Object>("sleep",20));
+					bisbat.roomFindingThread.failure();
+
+
+					
 					//throw new Exception("testing");
 					
 				} catch(Exception e) {

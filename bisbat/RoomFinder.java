@@ -7,6 +7,7 @@ public class RoomFinder extends Thread {
 	
 	private LinkedList<Room> foundRooms;
 	public LinkedList<String> commandList;
+	private boolean failure = false;
 	private Bisbat bisbat = null;
 	
 	public RoomFinder(Bisbat bisbat) {
@@ -39,6 +40,11 @@ public class RoomFinder extends Thread {
 		//Bisbat.print("Waiting for a room."); // debugger
 		while(foundRooms.size() <= 0) {
 			try {
+				if(failure) {
+					commandList.removeFirst();
+					failure = false;
+					return null;
+				}
 				Thread.sleep(100); // Optimize with semaphores? !TODO
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -153,6 +159,11 @@ public class RoomFinder extends Thread {
 			
 		}
 		return null;
+	}
+
+	public void failure() {
+		failure = true;
+		
 	}
 	
 }

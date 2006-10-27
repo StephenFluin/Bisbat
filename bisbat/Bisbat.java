@@ -75,6 +75,14 @@ public class Bisbat extends Thread {
 	 			} else {
 	 				debug("We were given a non-being to consider, you fool!");
 	 			}
+	 		} else if(toDoItem.left.equals("sleep")) {
+				connection.send("sleep");
+				try{
+					Thread.sleep(((Integer)toDoItem.right)*1000);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+				connection.send("wake");
 	 		} else if(toDoItem.left.equals("survive")) {
 	 			print("Good job, we have done everything we can in this game.");
 	 			try{
@@ -116,6 +124,11 @@ public class Bisbat extends Thread {
 			connection.follow(chosenExit);
 			otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
 			chosenExit.nextRoom = roomFindingThread.pop();
+			if(chosenExit.nextRoom == null) {
+				print("Our exploration attempt failed, lets explore later.");
+				return;
+			}
+			
 			Room previousRoom = currentRoom;
 			currentRoom = chosenExit.nextRoom;
 			//System.out.println("Other direction is: " + otherExitDirection + " and it should exist in the most recently found room."); // debugger
