@@ -1,6 +1,8 @@
 package bisbat;
 
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Being {
 	
@@ -53,12 +55,26 @@ public class Being {
 			setGuessResult(false);
 			return false;
 		} else {
+			Pattern p = Pattern.compile("(.*) looks much tougher than you\\..*", Pattern.MULTILINE | Pattern.DOTALL);
+			Pattern p2 = Pattern.compile("You are much tougher than (.*)\\..*");
+			Matcher m = p.matcher(result);
+			if(m.matches()) {
+				//Bisbat.debug("Someone looks much tougher than us, lets grab '" + m.group(1) + "'.");
+				shortDesc = m.group(1);
+				name = stripOfPronouns(shortDesc);
+			} else if(p2.matcher(result).matches()) {
+				shortDesc = p2.matcher(result).group(1);
+				name = stripOfPronouns(shortDesc);
+				
+			} else {
+				Bisbat.debug("Neither thing matched");
+			}
 			setGuessResult(true);
 			return true;
 		}
 	}
-	public void setGuessResult(boolean sucess) {
-		if(sucess) {
+	public void setGuessResult(boolean success) {
+		if(success) {
 			if(guessMode == 0) {
 				guessMode = 1;
 			} else if(guessMode == 1) {
@@ -83,4 +99,13 @@ public class Being {
 		}
 	}
 
+	public static String stripOfPronouns(String string) {
+		String result = string.replaceAll("the ", "");
+		result = result.replaceAll("a ", "");
+		return result;
+	}
+	
+	public String toString() {
+		return (shortDesc == null ? longDesc : shortDesc);
+	}
 }
