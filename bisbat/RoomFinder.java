@@ -45,12 +45,12 @@ public class RoomFinder extends Thread {
 					failure = false;
 					return null;
 				}
-				Thread.sleep(100); // Optimize with semaphores? !TODO
+				Thread.sleep(50); // Optimize with semaphores? !TODO
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
-		//Bisbat.print("Found a room to pop."); // debugger
+		//Bisbat.debug("Found a room to pop."); // debugger
 		if(!discovering) {
 			return popFirstRoom();
 		}
