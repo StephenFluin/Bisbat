@@ -44,7 +44,6 @@ public class Bisbat extends Thread {
 
 	 	toDoList.push(new Pair<String,Object>("survive", null));
 	 	toDoList.push(new Pair<String,Object>("explore", null));
-	 	outer:
 	 	while(toDoList.size() > 0) {
 	 		Pair<String,Object> toDoItem = toDoList.pop();
 	 		if(toDoItem.left.equals("explore")) {
@@ -57,13 +56,18 @@ public class Bisbat extends Thread {
 	 				String result = resultQueue.pop();
 	 				
 	 				// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
+	 				boolean continuu = false;
 	 				while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
 	 					if(result.contains("leaves to the")) {
 	 						debug("Someone left the room and now I am all fuddled.");
-	 						continue outer;
+	 						continuu = true;
+	 						break;
 	 					}
 	 					//debug("Dumping: " + result + " because it didn't match anything we were looking for.");
 	 					result = resultQueue.pop();
+	 				}
+	 				if(continuu) {
+	 					continue;
 	 				}
 	 					
 	 				if(!b.setGuessResult(result)) {
