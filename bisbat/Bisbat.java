@@ -65,38 +65,7 @@ public class Bisbat extends Thread {
 	 		if(toDoItem.left.equals("explore")) {
 	 			explore();
 	 		} else if(toDoItem.left.equals("consider")) {
-	 			if(toDoItem.right instanceof Being) {
-	 				Being b = ((Being)toDoItem.right);
-	 				connection.send("consider " + b.guessName());
-	 				debug("Considering a mobile");
-	 				String result = resultQueue.pop();
-	 				
-	 				// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
-	 				boolean continuu = false;
-	 				while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
-	 					if(result.contains("leaves to the")) {
-	 						debug("Someone left the room and now I am all fuddled.");
-	 						continuu = true;
-	 						break;
-	 					}
-	 					//debug("Dumping: " + result + " because it didn't match anything we were looking for.");
-	 					result = resultQueue.pop();
-	 				}
-	 				if(continuu) {
-	 					continue;
-	 				}
-	 					
-	 				if(!b.setGuessResult(result)) {
-	 					toDoList.push(new Pair<String,Object>("consider", b));
-	 				} else {
-	 					if(!b.isSureOfName()) {
-	 						toDoList.push(new Pair<String,Object>("consider", b));
-	 					}
-	 				}
-	 				
-	 			} else {
-	 				debug("Consider was added to the toDoList without a being");
-	 			}
+	 			consider(toDoItem);
 	 		} else if(toDoItem.left.equals("sleep")) {
 				sleep((Integer)toDoItem.right);
 	 		} else if(toDoItem.left.equals("survive")) {
@@ -111,6 +80,42 @@ public class Bisbat extends Thread {
 	 	connection.send("quit");
 	}
 	
+	private void consider(Pair<String,Object> toDoItem) {
+
+		if(toDoItem.right instanceof Being) {
+			Being b = ((Being)toDoItem.right);
+			connection.send("consider " + b.guessName());
+			debug("Considering a mobile");
+			String result = resultQueue.pop();
+			
+			// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
+			boolean continuu = false;
+			while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
+				if(result.contains("leaves to the")) {
+					debug("Someone left the room and now I am all fuddled.");
+					continuu = true;
+					break;
+				}
+				//debug("Dumping: " + result + " because it didn't match anything we were looking for.");
+				result = resultQueue.pop();
+			}
+			if(continuu) {
+				return;
+			}
+				
+			if(!b.setGuessResult(result)) {
+				toDoList.push(new Pair<String,Object>("consider", b));
+			} else {
+				if(!b.isSureOfName()) {
+					toDoList.push(new Pair<String,Object>("consider", b));
+				}
+			}
+			
+		} else {
+			debug("Consider was added to the toDoList without a being");
+		}
+	}
+
 	public void login() {
 		connection.send(name);
 		connection.send(password);
@@ -161,11 +166,15 @@ public class Bisbat extends Thread {
 			otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
 
 		} catch(NullPointerException e) {
-			System.err.println("Null Pointer\nCurrent Room Title: " + currentRoom.title + " otherExitDirection:" + otherExitDirection);
+			if(currentRoom == null) {
+				Bisbat.debug("Current room was null.");
+			} else {
+				Bisbat.debug("Null Pointer\nCurrent Room Title: " + currentRoom.title + " otherExitDirection:" + otherExitDirection);
+			}
 			e.printStackTrace();
 			toDoList.pop(); //bail so I can see what is happening
 		} catch (Exception e) {
-			System.err.println("Error in random walk"); 
+			Bisbat.debug("Error in random walk"); 
 			e.printStackTrace();
 		} 
 	}
@@ -475,9 +484,16 @@ public class Bisbat extends Thread {
 		}
 		chosenExit.confirm();
 		Room previousRoom = currentRoom; //store the previous room
-		connection.send(chosenExit.getDoorCommand()); //open a door if it's there
+		if(chosenExit.getDoorCommand() != null) {
+			connection.send(chosenExit.getDoorCommand()); //open a door if it's there
+		}
 		connection.sendNavigation(chosenExit.direction);
-		currentRoom = roomFindingThread.pop(true);
+		Room result = roomFindingThread.pop(true);
+		if(result != null) {
+			currentRoom = result;
+		} else {
+			return false;
+		}
 		//did we go where we expected to go?
 		if (!exploring) {
 			//debug("Recognize that we are NOT exploring");
