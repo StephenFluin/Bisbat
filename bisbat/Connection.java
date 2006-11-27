@@ -31,8 +31,10 @@ public class Connection {
 		if(s != null) {
 			out.send(s);
 		} else {
-			System.out.println("The string I am trying ot send is null.");
+			System.out.println("The string I am trying to send is null.");
+			throw new NullPointerException();
 		}
+		
 		
 	}
 	
