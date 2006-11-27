@@ -54,6 +54,7 @@ public class RoomFinder extends Thread {
 				if(failure) {
 					commandList.removeFirst();
 					failure = false;
+					Bisbat.debug("We had a problem walking somewhere!");
 					return null;
 				}
 				Thread.sleep(50); // Optimize with semaphores? !TODO
