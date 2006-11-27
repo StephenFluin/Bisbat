@@ -28,23 +28,17 @@ public class Connection {
 	}
 	
 	public void send(String s) {
-		if(s == null) {
+		if(s != null) {
+			out.send(s);
+		} else {
 			System.out.println("The string I am trying ot send is null.");
 		}
-		out.send(s);
+		
 	}
 	
 	public void sendNavigation(String command) {
 		send(command);
 		bisbat.roomFindingThread.add(command);
-	}
-	
-	public void follow(Exit chosenExit) {
-		String doorCommand = chosenExit.getDoorCommand();
-		if(doorCommand != null) {
-			send(doorCommand);
-		}
-		sendNavigation(chosenExit.direction);
 	}
 	
 }

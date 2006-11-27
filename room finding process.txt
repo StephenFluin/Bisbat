@@ -11,8 +11,4 @@ Search state space for all matching rooms that is at least 2 exits away.
 			No: Discredit all hpotheses proven false.
 				Construct new hypothetical room connected to current room.
 				Repeat 3 times after reduction to single hypothesis, 
-					using previous hypothetical rooms to disprove original hypothesis. 
-
-
-
-     
+					using previous hypothetical rooms to disprove original hypothesis.

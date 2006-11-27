@@ -6,7 +6,7 @@ import java.net.*;
 public class SendCommands extends Thread {
 	
 	private BufferedReader reader;
-	PrintWriter out;
+	public PrintWriter out;
 	public Bisbat bisbat;
 	
 	public SendCommands(Socket socket, Bisbat bisbat) {
@@ -38,6 +38,14 @@ public class SendCommands extends Thread {
 						Bisbat.print(bisbat.knownBeingList.toString());
 					} else if(command.equalsIgnoreCase("sleep")) {
 						bisbat.toDoList.add(new Pair<String,Object>("sleep",10));
+					} else if (command.equalsIgnoreCase("printRoom")) {
+						Bisbat.print(bisbat.currentRoom.toString());
+					} else if (command.equalsIgnoreCase("foundRooms")) {
+						Bisbat.print("" + bisbat.roomFindingThread.isEmpty());
+					} else if (command.equalsIgnoreCase("reference")) {
+						bisbat.returnToReference();
+					} else if(command.equalsIgnoreCase("count")) {
+						bisbat.currentRoom.printCount();
 					} else {
 						out.println(command);
 					}

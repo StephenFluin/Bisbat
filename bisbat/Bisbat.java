@@ -15,11 +15,14 @@ public class Bisbat extends Thread {
 	public String password;
 	private String prompt;
 	public Room currentRoom;
+	public Room referenceRoom; //the one room we must assume to be true;
 	public Vector<Being> knownBeingList;
 	public Vector<Item> knownItemList;
 	public RoomFinder roomFindingThread;
 	public ResultQueue resultQueue;
 	public Stack<Pair<String,Object>> toDoList;
+	public boolean interrupted = false;
+	
 	
 	/**
 	 * Constructs a new instance of Bisbat
@@ -38,14 +41,27 @@ public class Bisbat extends Thread {
 	 	toDoList = new Stack<Pair<String,Object>>();
 	}
 
+	/**
+	 * Creates a connection to the world, and logs Bisbat in.
+	 * Determines Bisbats actions based on the toDoList
+	 */
 	public void run() {
+		// Connect to the world, and login
 		connection = new Connection(this, "www.mortalpowers.com", 4000);
 	 	login();
-
+	 	
+	 	//print out the start of the clock.
+	 	print("Starting objectives");
+	 	
+	 	// Set initial objectives
 	 	toDoList.push(new Pair<String,Object>("survive", null));
+	 	toDoList.push(new Pair<String,Object>("reference", null));
 	 	toDoList.push(new Pair<String,Object>("explore", null));
+	 	
+	 	// Determine next objective and act accordingly
 	 	while(toDoList.size() > 0) {
 	 		Pair<String,Object> toDoItem = toDoList.pop();
+	 		interrupted = false;
 	 		if(toDoItem.left.equals("explore")) {
 	 			explore();
 	 		} else if(toDoItem.left.equals("consider")) {
@@ -79,24 +95,17 @@ public class Bisbat extends Thread {
 	 				}
 	 				
 	 			} else {
-	 				debug("We were given a non-being to consider, you fool!");
+	 				debug("Consider was added to the toDoList without a being");
 	 			}
 	 		} else if(toDoItem.left.equals("sleep")) {
-				connection.send("sleep");
-				try{
-					Thread.sleep(((Integer)toDoItem.right)*1000);
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-				connection.send("wake");
+				sleep((Integer)toDoItem.right);
 	 		} else if(toDoItem.left.equals("survive")) {
-	 			print("Good job, we have done everything we can in this game.");
-	 			try{
-	 				Thread.sleep(30000);
-	 			} catch(Exception e) {
-	 				e.printStackTrace();
-	 			}
-	 			toDoList.push(new Pair<String,Object>("survive", null));
+	 			survive();
+	 		} else if(toDoItem.left.equals("confirm")) {
+	 			confirm();	 			
+	 		} else if(toDoItem.left.equals("reference")) {
+	 			returnToReference();
+	 			currentRoom.printCount(); //debug
 	 		}
 	 	}
 	 	connection.send("quit");
@@ -112,53 +121,236 @@ public class Bisbat extends Thread {
 		
 		roomFindingThread.add("look");
 		currentRoom = roomFindingThread.pop();
+		referenceRoom = currentRoom;
+		currentRoom.confirm(); // first room must be confirmed
 	}
 	
 	public void explore() {	
 		//debug("Starting exploration");
 		String otherExitDirection = "";
+		boolean foundOurWay = true;
 		try {
-			//currentRoom.printTree(); // debugger
-			Exit chosenExit = currentRoom.getRandomUnexploredExit();
-			
-			if(chosenExit == null) {
+
+			if(currentRoom.getRandomUnexploredExit() == null) {
 				Room findMe = findRoomWithUnexploredExits();
 				if(findMe == null) {
 					print("We have finished mapping the known universe.");
 					return;
 				}
-				boolean success = walkToRoomIfKnown(findMe);
-				if(!success) {
-					toDoList.push(new Pair<String,Object>("explore",null));
-					return;
-				}
-				chosenExit = currentRoom.getRandomUnexploredExit();
+				toDoList.push(new Pair<String,Object>("explore",null));
+				foundOurWay = walkToRoomIfKnown(findMe);
+			} else {
+				toDoList.push(new Pair<String,Object>("explore",null));
 			}
-			toDoList.push(new Pair<String,Object>("explore",null));
-			connection.follow(chosenExit);
-			otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
-			chosenExit.nextRoom = roomFindingThread.pop();
-			if(chosenExit.nextRoom == null) {
-				//print("Our exploration attempt failed, lets explore later.");
+			if (!foundOurWay) {
 				return;
 			}
 			
-			Room previousRoom = currentRoom;
-			currentRoom = chosenExit.nextRoom;
-			//System.out.println("Other direction is: " + otherExitDirection + " and it should exist in the most recently found room."); // debugger
-			currentRoom.getExit(otherExitDirection).nextRoom = previousRoom;
-
+			//we should now be at a room with an unexplored exit (if not, then there are non!)
+			if(currentRoom.getRandomUnexploredExit() == null) {
+				debug("We are trying to explore, but there are no known unexplored exits");
+				return;
+			}
 			
+			Exit chosenExit = currentRoom.getRandomUnexploredExit();
+			if (chosenExit == null) {
+				debug("last update to chosenExit in bisbat.explore is really goofy");
+			}
+			follow(chosenExit);
+			//debug("Exited follow at follow of bisbat");
+			otherExitDirection = Exit.getOpposite(chosenExit.getDirection());
+
 		} catch(NullPointerException e) {
 			System.err.println("Null Pointer\nCurrent Room Title: " + currentRoom.title + " otherExitDirection:" + otherExitDirection);
 			e.printStackTrace();
+			toDoList.pop(); //bail so I can see what is happening
 		} catch (Exception e) {
 			System.err.println("Error in random walk"); 
 			e.printStackTrace();
 		} 
-		//debug("Done exploration");
 	}
 	
+	/**
+	 * Has Bisbat consider a being found in the game.
+	 * @param being: being found in the game.
+	 */
+	public void consider(Being being) {
+		connection.send("consider " + being.guessName());
+		debug("Considering a mobile");
+		String result = resultQueue.pop();
+		
+		// We don't want just any pop, we want a pop in response to our query.  
+		// Dumping all other input for now, later we will have to deal with these.
+		while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
+			debug("Dumping: " + result + " because it didn't match anything we were looking for.");
+			if(result.contains("much tougher than you.")) debug("Much tougher than you matched.");
+			if(result.contains("tough as you.")) debug("Tough as you matched.");
+			if(result.contains("You are much")) debug("You matched.");
+			result = resultQueue.pop();
+		}
+			
+		if(!being.setGuessResult(result)) {
+			toDoList.push(new Pair<String,Object>("consider", being));
+		} else {
+			if(!being.isSureOfName()) {
+				toDoList.push(new Pair<String,Object>("consider", being));
+			}
+		}	
+	}
+	
+	/**
+	 * Instructs Bisbat to sleep in the game.
+	 * @param duration: (seconds) length Bisbat should sleep.
+	 */
+	public void sleep(int duration) {
+		connection.send("sleep");
+		try{
+			Thread.sleep(duration * 1000);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		connection.send("wake");
+	}
+	
+	/**
+	 * Instructs Bisbat to simply survive in the environment.
+	 */
+	public void survive() {
+		print("Good job, we have done everything we can in this game.");
+		try{
+			Thread.sleep(30000);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		toDoList.push(new Pair<String,Object>("survive", null));
+	}
+	
+	/**
+	 * Instructions to determine if a room is unique. Finds all matching rooms, 
+	 * consolidates if it is confirmed to be a previously found room. If something cannot 
+	 * be confirmed, this method will add explore to the toDoList. If there is nothing to 
+	 * confirm, this method will not add itself.
+	 */
+	public void confirm() {
+		//debug("Entered confirm() method");
+		//find the nearest unconfirmed room, and go there
+		if (!currentRoom.confirmed()) {
+			ArrayList<Exit> path = RoomFinder.searchForPathToUnconfirmedRoom(currentRoom);
+			if (path == null) {
+				//we didn't find an unconfirmed room in the knowledge base, we're done here
+				//debug("exiting confirm at exit 1");
+				return;
+			}
+			for(Exit exit : path) {
+				follow(exit);
+				if (interrupted) {
+					// we have been interrupted, try again.
+					toDoList.push(new Pair<String,Object>("confirm",null));
+					//debug("exiting confirm at exit 2");
+					return;
+				} 
+			}
+		}
+		//we are now at the nearest unconfirmed room it is likely that we didn't move.
+		//store this room, it wil be usefull if we end up consolidating!
+		Room previous = currentRoom;		
+		//find all the (confirmed) rooms that match this room in the knowledge base.
+		LinkedList<Room> matches = RoomFinder.searchForAllMatchingRooms(referenceRoom, currentRoom);
+		LinkedList<Room> temp = new LinkedList<Room>();
+		for (Room room : matches) {
+			if (!room.confirmed()) {
+				temp.add(room);
+			}
+		}
+		//store these rooms, if we consolidate, one of these will be the one consolidated
+		LinkedList<Room> matched = new LinkedList<Room>();
+		for (Room room : matches) {
+			matched.add(room);
+		}
+		//remove all unconfirmed rooms from matches
+		matches.removeAll(temp);
+		temp.clear();
+		if (matches.isEmpty()){
+			//no confirmed rooms match this room. This is a new room, confirm.
+			currentRoom.confirm();
+		} else {
+			/* There is at least one confirmed room that matches our current room.
+			 * Since all of these rooms have been confirmed, there must be a known path,
+			 * i.e. a path of confirmed exits, that distinguished them from eachother.
+			 * if we follow this path, we will be able to determine which, if any of those
+			 * rooms, our currentRoom matches. */
+			LinkedList<String> dirPath = RoomFinder.commonConfirmedPath(matches);
+			
+			//debug("The current Room!");
+			//debug("dirPath has size: " + dirPath.size());
+			for(String dir : dirPath) {
+				for (Room room : matches) {
+					if (room != null && room.getExit(dir) != null) {
+						temp.add(room.getExit(dir).nextRoom);
+					}
+				}
+				matches.clear();
+				matches.addAll(temp);
+				temp.clear();
+				//follow our direction, see what we get
+				//debug("Is this the follow command that yields the trying to follow(null) message");
+				follow(currentRoom.getExit(dir), false);			
+				if (currentRoom == null) {
+					debug("Well... our currentRoom is null... ?");
+				}
+				for (Room room : matches) {
+					if (!currentRoom.matchesRoom(room)) {
+						temp.add(room);
+					}
+				}
+				//remove everything that no longer matches what we see
+				matches.removeAll(temp);
+				if(matches.isEmpty()) {
+					break;
+				}
+			}
+			//debug("We should have just finished following our distinguishing path.");
+			//there are three cases here
+			if (matches.isEmpty()){
+				//previous is a unique room, confirm it's existence
+				//debug("we have determined that this is a unique room!");
+				previous.confirm();
+			} else if (matches.size() == 1) {
+				//debug("Trying to consolidate two rooms:");
+				//previous is (to a depth of 4) the same as the one element in matches
+				//which original room went to this room.
+				Room toConsolidate = null;
+				for(Room room : matched) {
+					Room next = room.roomAfterPath(dirPath);
+					if (currentRoom.matchesRoom(next)) {
+						toConsolidate = room;
+						break;
+					}
+				}
+				//debug("attempting to consolidate");	
+				if (toConsolidate != null){
+					//consolidate rooms.
+					toConsolidate.update(previous);
+					toConsolidate.getExit(dirPath.getFirst()).nextRoom = previous.getExit(dirPath.getFirst()).nextRoom;
+					//debug("Finished Consolidation");
+				} else {
+					debug("Something went wrong while consolidating inside confirm()");
+				}
+			} else {
+				//something went wrong, coudn't distinguish by distinguishing path
+				debug("Couldn't confirm a room with a distinguishing path of length 4");
+			}
+			//debug("exiting confirm at exit 3");
+			
+		}
+	}
+	
+	
+	/**
+	 * Searches the knowledge base for an unexplored exit.
+	 * Search opperates breadth-first from Bisbat's current location.
+	 * @return: first room that is found with an unexplored exit
+	 */
 	public Room findRoomWithUnexploredExits() {
 		LinkedList<Room> exploredRooms = new LinkedList<Room>();
 		LinkedList<Room> searchQueue = new LinkedList<Room>();
@@ -203,35 +395,160 @@ public class Bisbat extends Thread {
 	/**
 	 * This method will be used to walk to a room that has unexplored exits, or
 	 * whenever we want to walk to a destination room.
-	 * @param walkMeToHere
+	 * @param walkMeToHere: room Bisbat should walk to.
+	 * @return: True if we walked all the way to given room, false otherwise.
 	 */
 	public boolean walkToRoomIfKnown(Room walkMeToHere) {
-		//System.out.println("We are walkToRoomIfKnown ing."); // debugger
-		//System.out.println("Current KB:"); // debugger
-		//currentRoom.printTree(); // debugger
 		ArrayList<Exit> path = null;
 		try {
-			//System.out.println("I don't see a room '" + s + "'!"); // debugger
 			path = RoomFinder.searchForPathBetweenRooms(currentRoom, walkMeToHere);
 		} catch(OutOfMemoryError e) {
-			System.out.println("We had a wee bit of trouble searching for the path between two rooms. OUT OF MEMORY!");
+			System.out.println("Path betwen rooms -> out of memory!");
 		}
-		//System.out.println("Following a path from " + currentRoom.title + " to  " + walkMeToHere.title); // debugger
 		if(path == null) {
 			throw new NullPointerException("Couldn't find a path to desired room.");
 		}
 		for(Exit e : path) {
-			connection.follow(e);
-			Room r = roomFindingThread.pop(false);
-			if(r == null) {
-				//debug("Failure in speedwalk. I think we need to refollow.");
+			follow(e); //follows given exit.
+			if (interrupted) {
+				return false; //failed to get to where we wanted to go.
+			} 
+		}
+		return true; // done following the path
+	}
+	
+	/**
+	 * instructs bisbat to return to our refernce room.
+	 * If he find his way this will add explore to the todoList.
+	 * Returns true if it failed
+	 */
+	public boolean returnToReference(){
+		ArrayList<Exit> path = RoomFinder.searchForPathBetweenRooms(currentRoom, referenceRoom);
+		if(path == null) {
+			toDoList.push(new Pair<String,Object>("explore",null));
+			return false;
+		} else {
+			for(Exit e : path) {
+				follow(e); //follows given exit.
+				if (interrupted) {
+					toDoList.push(new Pair<String,Object>("explore",null));
+					return false; //failed to get to where we wanted to go.
+				} 
+			}
+			//save the game, should end here!
+			connection.send("save");
+			return true;
+		}
+	}
+	
+	
+	/**
+	 * This method is called for instructing bisbat to follow a given exit.
+	 * In the process of following this exit, several things occur:
+	 * 1. Determines if this exit goes where bisbat thinks it should.
+	 * 2. Determines if next room is a room bisbat has already been to.
+	 * 3. Ensures that knowledge of rooms is not lost.
+	 * 4. Finds mazes, and other anomalies.
+	 * @param chosenExit: exit to follow
+	 * @return: true if we went to a known room, otherwise, false;
+	 */
+	public boolean follow(Exit chosenExit) {
+		return follow(chosenExit, true);
+	}
+	
+	/**
+	 * This method is called for instructing bisbat to follow a given exit.
+	 * In the process of following this exit, several things occur:
+	 * 1. Determines if this exit goes where bisbat thinks it should.
+	 * 2. Determines if next room is a room bisbat has already been to.
+	 * 3. Ensures that knowledge of rooms is not lost.
+	 * 4. Finds mazes, and other anomalies.
+	 * @param chosenExit: exit to follow
+	 * @param exploring: False only in the case that we are not looking for new rooms.
+	 * @return: true if we went to a known room, otherwise, false;
+	 */
+	public boolean follow(Exit chosenExit, boolean exploring) {
+
+		if (chosenExit == null) {
+			//Bisbat.debug("we are trying to follow(null) and it isn't working");
+			return false; 
+		}
+		chosenExit.confirm();
+		Room previousRoom = currentRoom; //store the previous room
+		connection.send(chosenExit.getDoorCommand()); //open a door if it's there
+		connection.sendNavigation(chosenExit.direction);
+		currentRoom = roomFindingThread.pop(true);
+		//did we go where we expected to go?
+		if (!exploring) {
+			//debug("Recognize that we are NOT exploring");
+			//currentRoom.printTree();
+			if (chosenExit.nextRoom != null && chosenExit.nextRoom.matchesRoom(currentRoom)){
+				//path went where it was expected to go.
+				chosenExit.nextRoom.update(currentRoom);
+				currentRoom = chosenExit.nextRoom;
+				return true;
+			} else if(currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())) != null) {
+				//there is the possibilty of a bidirectional exit (assume that it is one)
+				currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())).nextRoom = previousRoom;
+			} else {
+				debug("did not find a bidirectional exit in a non-exploring situation");
+			}
+			chosenExit.nextRoom = currentRoom;
+			return true;
+		} else if (chosenExit.nextRoom != null && chosenExit.nextRoom.matchesRoom(currentRoom)) {
+			//path went where it was expected to go.
+			chosenExit.nextRoom.update(currentRoom);
+			currentRoom = chosenExit.nextRoom;
+			return true;
+		} else {
+			//path did not go where we expected or we didn't know where it was going
+			//note that there is no longer a path from currentRoom to the referenceRoom
+			//does this room match the room we just came from... if so, acting assumption that it's a new room.
+			if (currentRoom.matchesRoom(previousRoom)) {
+				currentRoom.confirm();
+				//this is a new room, is it possible that it's bidirectional. If so, assume it is.
+				if(currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())) != null) {
+					//there is the possibilty of a bidirectional exit (assume that it is one)
+					currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())).nextRoom = previousRoom;
+				}
+				//connect previous room to our current room.
+				chosenExit.nextRoom = currentRoom;
 				return false;
 			}
-			currentRoom = e.nextRoom;
-			//currentRoom.printTree(); // debugger
+			
+			//is this a room that we have already been too?
+			chosenExit.nextRoom = null; // ensure that we're not acting on incorrect knowledge base
+			LinkedList<Room> matches = RoomFinder.searchForAllMatchingRooms(referenceRoom, currentRoom);
+			chosenExit.nextRoom = currentRoom;
+			
+			if (matches.isEmpty()) {
+				//this is not a room we have been in before (integrate new room into the knowledge base)
+				//confirm this room as existing... since it has no matches
+				currentRoom.confirm();
+				//is there the possibility of a bidirectional exit
+				if(currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())) != null) {
+					//there is the possibilty of a bidirectional exit (assume that it is one)
+					currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())).nextRoom = previousRoom;
+					return false;
+				} else {
+					//do nothing, we don't know how to get back to referenceRoom yet
+					//cannot get back to the reference room, should probably explore
+					debug("how often is this case of follow happening?");
+					return false;
+				}				
+			} else {
+				//room matches at least 1 room in knowledge base
+				//is there the possibility of a bidirecitonal exit?
+				if(currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())) != null) {
+					//there is the possibilty of a bidirectional exit (assume that it is one)
+					currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())).nextRoom = previousRoom;
+				}
+				//interrupt current toDoItem and confirm room!
+				interrupted = true;
+				toDoList.push(new Pair<String,Object>("confirm",null));
+				return false;
+			}
 		}
-		return true;
-		//System.out.println("Done following the path."); // debugger
 	}
 	
 	public void addKnowledgeOf(Item i) {
@@ -242,7 +559,7 @@ public class Bisbat extends Thread {
 	
 	public void addKnowledgeOf(Being b) {
 		if(b == null) {
-			debug("You are trying to add knowledge of anull, this is a problem.");
+			debug("You are trying to add knowledge of a null, this is a problem.");
 		}
 		if(!knownBeingList.contains(b)) {
 			knownBeingList.add(b);
@@ -272,6 +589,5 @@ public class Bisbat extends Thread {
 		alpha.start(); 
 	}
 	
-
-
+	
 }

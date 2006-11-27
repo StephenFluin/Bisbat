@@ -1,6 +1,7 @@
 package bisbat;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Hashtable;
 
 public class Exit {
@@ -9,6 +10,14 @@ public class Exit {
 	public boolean isDoorOpen;
 	public Room nextRoom; // null if unknown
 	public String direction;
+	public boolean confirmed;
+	
+	public void confirm() {
+		confirmed = true;
+	}
+	public boolean isConfirmed() {
+		return confirmed;
+	}
 	
 	/**
 	 * Constructs an exit.
@@ -16,6 +25,7 @@ public class Exit {
 	 */
 	public Exit(String dir) {
 		dir = dir.trim().toLowerCase(); // since "West" != "west"
+		confirmed = false;
 		if (dir.charAt(0) == '[' || dir.charAt(0) == '<') {
 			isDoor = true;
 			if (dir.charAt(0) == '['){
@@ -43,6 +53,7 @@ public class Exit {
 	
 	public static String getOpposite(String command) {
 		//System.out.println("Finding the opposite of " + command); // debugger
+		if(command == null) return null;
 		if(command.equals("west")) return "east";
 		if(command.equals("east")) return "west";
 		if(command.equals("north")) return "south";
@@ -56,6 +67,16 @@ public class Exit {
 		return null;
 	}
 
+
+	public static double spatialRelativityCalculation(LinkedList<String> path) {
+		ArrayList<Exit> dummy = new ArrayList<Exit>();
+		for (String dir : path) {
+			Exit temp = new Exit(dir);
+			dummy.add(temp);
+		}
+		return spatialRelativityCalculation(dummy);
+	}
+	
 	public static double spatialRelativityCalculation(ArrayList<Exit> path) {
 		Hashtable<String,Integer> exitList = new Hashtable<String,Integer>();
 		String direction;
@@ -98,14 +119,10 @@ public class Exit {
 		result = Math.sqrt(result);
 		//System.out.println("We just did some cool spatial calculations, and we got: " + result ); // debugger
 		
-		/* // debugger
-		System.out.print("FYI, that was from path: "); 
-		for(Exit e : path) {
-			System.out.print(e.getDirection() + ", ");
-		System.out.println();
-		*/
 		return result;
 	}
+
+	
 	
 	
 }

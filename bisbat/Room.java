@@ -22,42 +22,33 @@ public class Room {
 	public String title = new String();
 	public Vector<Being> beings = new Vector<Being>();
 	public Vector<Item> items = new Vector<Item>();
-	
+	boolean confirmed = false;
 	
 	/**
-	 * Returns true if this room is indistinguishable from given room.
+	 * Determines if two rooms could be the same.
+	 * @param room: room that might match this room.
+	 * @return: True if this room is undistinguishable from given room.
 	 */
 	public boolean matchesRoom(Room room) {
-		/* //debugger
-		System.out.println("Findy room:");
-		room.print();
-		System.out.println("This room:");
-		print();
-		*/
-		if (!title.equals(room.title)) {	
+		if (room == null) {
+			return true; // null room matches everything
+		} else if (!title.equals(room.title)) {	
 			return false;
-		}
-		if (!description.equals(room.description)) {
+		} else if (!description.equals(room.description)) {
 			return false;
-		}
-		if (exits.size() != room.exits.size()) {
+		} else if (exits.size() != room.exits.size()) {
 			return false;
-		}
-		Exit temp;
-		for (Exit e : exits) {
-			temp = room.getExit(e.direction);
-			if (temp == null) {
-				return false;
-			}
-			if (e.isDoor != temp.isDoor) {
-				return false;
+		} else {
+			Exit temp;
+			for (Exit e : exits) {
+				temp = room.getExit(e.direction);
+				if (temp == null) {
+					return false;
+				} else if (e.isDoor != temp.isDoor) {
+					return false;
+				}
 			}
 		}
-		/*
-		 Should check adjacent rooms for difference too
-		 Possibly a depth limited breadth first search
-		 Without this, Bisbat will probably fail when presented with identical rooms
-		*/
 		return true; // can't find a difference
 	}
 	
@@ -81,6 +72,22 @@ public class Room {
 	}
 	
 	/**
+	 * confirmes this room as being a unique room in the knowledge base
+	 * 
+	 */
+	public void confirm() {
+		confirmed = true;
+	}
+	
+	/**
+	 * Returns true if room has been uniquely confirmed
+	 * @return: true if confirmed, else false
+	 */
+	public boolean confirmed() {
+		return confirmed;
+	}
+	
+	/**
 	 * prints a string representation to system.out 
 	 * !TODO this is a debugging method
 	 */
@@ -97,7 +104,7 @@ public class Room {
 		return result;
 	}
 	
-	Exit getRandomUnexploredExit() {
+	public Exit getRandomUnexploredExit() {
 		ArrayList<Exit> une = getUnexploredExits();
 		if(une.size() == 0) {
 			//System.out.println("Finished exploring this room."); // debugger
@@ -106,7 +113,21 @@ public class Room {
 		return une.get((int)Math.round(Math.random() * (une.size() -1)));		
 	}
 	
-	Exit getExit(int i) {
+	public Exit getRandomConfirmedExit() {
+		ArrayList<Exit> ce = new ArrayList<Exit>();
+		for(Exit e : exits) {
+			if(e.confirmed) {
+				ce.add(e);
+			}
+		}
+		if (ce.isEmpty()) {
+			return null;
+		} else {
+			return ce.get((int)Math.round(Math.random() * (ce.size() -1)));	
+		}
+	}
+	
+	public Exit getExit(int i) {
 		return exits.get(i);
 		
 	}
@@ -137,7 +158,9 @@ public class Room {
 				exploredRooms.add(currentPair.left);
 				System.out.println(currentPair.right + currentPair.left.title + "(" 
 						+ currentPair.left.getUnexploredExits().size() + "/"
-						+ currentPair.left.exits.size() + ")"); // debugger
+						+ currentPair.left.getUnconfirmedExits().size() + "/"
+						+ currentPair.left.exits.size() + "/"
+						+ currentPair.left.confirmed + ")"); // debugger
 				for(Exit e : currentPair.left.exits) {
 					if(e.nextRoom != null) {
 						searchQueue.add(new Pair<Room,String>(e.nextRoom, currentPair.right + "  "));
@@ -145,7 +168,30 @@ public class Room {
 				}
 			}
 		}
+		System.out.println("Total rooms:" + counter); // debugger
+	}
+	
+	/**
+	 * Prints the number of rooms in the knowledge base
+	 */
+	void printCount(){
+		int counter = 0;
+		LinkedList<Room> exploredRooms = new LinkedList<Room>();
+		LinkedList<Pair<Room,String>> searchQueue = new LinkedList<Pair<Room,String>>();
+		searchQueue.add(new Pair<Room,String>(this, ""));
 		
+		while(searchQueue.size() > 0) {
+			Pair<Room,String> currentPair = searchQueue.removeFirst();
+			if(!exploredRooms.contains(currentPair.left)) {
+				counter++;
+				exploredRooms.add(currentPair.left);
+				for(Exit e : currentPair.left.exits) {
+					if(e.nextRoom != null) {
+						searchQueue.add(new Pair<Room,String>(e.nextRoom, currentPair.right + "  "));
+					}
+				}
+			}
+		}
 		System.out.println("Total rooms:" + counter); // debugger
 	}
 
@@ -158,5 +204,46 @@ public class Room {
 		}
 		return une;
 	}
+	
+	public ArrayList<Exit> getConfirmedExits() {
+		ArrayList<Exit> une = new ArrayList<Exit>();
+		for(Exit e : exits) {
+			if(e.isConfirmed()) {
+				une.add(e);
+			}
+		}
+		return une;
+	}
+	
+	public Room roomAfterPath(LinkedList<String> path) {
+		if (path.isEmpty()) {
+			return this;
+		}
+		if (getExit(path.getFirst()) == null) {
+			return null;
+		}
+		Room next = getExit(path.getFirst()).nextRoom;
+		if (next == null) {
+			return null;
+		} else {
+			LinkedList<String> nextPath = new LinkedList<String>();
+			for(String s : path) {
+				nextPath.addLast(s);
+			}
+			nextPath.removeFirst();
+			return next.roomAfterPath(nextPath);
+		}
+	}
+	
+	public ArrayList<Exit> getUnconfirmedExits() {
+		ArrayList<Exit> une = new ArrayList<Exit>();
+		for(Exit e : exits) {
+			if(!e.isConfirmed()) {
+				une.add(e);
+			}
+		}
+		return une;
+	}
+	
 	
 }
