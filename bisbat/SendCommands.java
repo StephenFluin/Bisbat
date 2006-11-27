@@ -28,28 +28,33 @@ public class SendCommands extends Thread {
 				return;
 			}
 			while (true) {
-					if(command.equals("exit")) {
-						throw(new NullPointerException());
-					} else if(command.equalsIgnoreCase("printTree")) {
-						bisbat.currentRoom.printTree();
-					} else if(command.equalsIgnoreCase("printToDo")) {
-						Bisbat.print(bisbat.toDoList.toString());
-					} else if(command.equalsIgnoreCase("moblist")) {
-						Bisbat.print(bisbat.knownBeingList.toString());
-					} else if(command.equalsIgnoreCase("sleep")) {
-						bisbat.toDoList.add(new Pair<String,Object>("sleep",10));
-					} else if (command.equalsIgnoreCase("printRoom")) {
-						Bisbat.print(bisbat.currentRoom.toString());
-					} else if (command.equalsIgnoreCase("foundRooms")) {
-						Bisbat.print("" + bisbat.roomFindingThread.isEmpty());
-					} else if (command.equalsIgnoreCase("reference")) {
-						bisbat.returnToReference();
-					} else if(command.equalsIgnoreCase("count")) {
-						bisbat.currentRoom.printCount();
-					} else {
-						out.println(command);
+					try{
+						//if(command.equals("exit")) {
+							//throw(new NullPointerException());
+						//} else
+						if(command.equalsIgnoreCase("printTree")) {
+							bisbat.currentRoom.printTree();
+						} else if(command.equalsIgnoreCase("printToDo")) {
+							Bisbat.print(bisbat.toDoList.toString());
+						} else if(command.equalsIgnoreCase("moblist")) {
+							Bisbat.print(bisbat.knownBeingList.toString());
+						} else if(command.equalsIgnoreCase("sleep")) {
+							bisbat.toDoList.add(new Pair<String,Object>("sleep",10));
+						} else if (command.equalsIgnoreCase("printRoom")) {
+							Bisbat.print(bisbat.currentRoom.toString());
+						} else if (command.equalsIgnoreCase("foundRooms")) {
+							Bisbat.print("" + bisbat.roomFindingThread.isEmpty());
+						} else if (command.equalsIgnoreCase("reference")) {
+							bisbat.returnToReference();
+						} else if(command.equalsIgnoreCase("count")) {
+							bisbat.currentRoom.printCount();
+						} else {
+							out.println(command);
+						}
+						command = reader.readLine();
+					} catch(Exception e) {
+						continue;
 					}
-					command = reader.readLine();
 			}
 			
 		} catch (IOException e) {
