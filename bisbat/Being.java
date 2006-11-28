@@ -46,6 +46,7 @@ public class Being {
 		} else {
 			if(guessLocation >= names.length) {
 				Bisbat.debug("We couldn't figure out the name of the mobile.  There is a chance she left us.");
+				return "!!!Unknown!!!";
 			}
 			return names[guessLocation];
 		}
