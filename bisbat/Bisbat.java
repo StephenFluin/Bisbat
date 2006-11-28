@@ -432,7 +432,30 @@ public class Bisbat extends Thread {
 	 * Returns true if it failed
 	 */
 	public boolean returnToReference(){
-		ArrayList<Exit> path = RoomFinder.searchForPathBetweenRooms(currentRoom, referenceRoom);
+		ArrayList<Exit> path = new ArrayList<Exit>();
+		LinkedList<Room> exploredRooms = new LinkedList<Room>();
+		LinkedList<Room> searchQueue = new LinkedList<Room>();
+		searchQueue.add(currentRoom);
+		
+		while(searchQueue.size() > 0) {
+			Room temp = searchQueue.removeFirst();
+			LinkedList<Room> rooms = RoomFinder.searchForAllMatchingRooms(referenceRoom,temp);
+			if(!exploredRooms.contains(temp)) {
+				exploredRooms.add(temp);
+			} else {
+				continue;
+			}
+			if(rooms == null || rooms.isEmpty() || rooms.size() == 1) {
+				path = RoomFinder.searchForPathBetweenRooms(currentRoom, referenceRoom);
+				break;
+			} else {
+				for(Exit e : temp.exits) {
+					if(e.nextRoom != null) {
+						searchQueue.add(e.nextRoom);
+					}
+				}
+			}
+		}
 		if(path == null) {
 			toDoList.push(new Pair<String,Object>("explore",null));
 			return false;
@@ -444,8 +467,8 @@ public class Bisbat extends Thread {
 					return false; //failed to get to where we wanted to go.
 				} 
 			}
-			//save the game, should end here!
 			connection.send("save");
+			
 			return true;
 		}
 	}
