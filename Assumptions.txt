@@ -11,9 +11,12 @@ Current assumptions that Bisbat makes:
 8.  Rooms cannot link to themselves.
 9.  Going from one room in one direction will not lead back to that room. (spatial location).
 10. Game environment is constant. Places/Exits do not disappear/appear
+11. Mobiles with the same long description are the same.
+12. Items with the same long description are the same.
 
 
 What can Bisbat currently do:
 
-1. Wonder randomly.
+1. Wander randomly.
 2. Knows how rooms he has been to connect to eachother.
+3. Discover the name of a mobile that he sees.
