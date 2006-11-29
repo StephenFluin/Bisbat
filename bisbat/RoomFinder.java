@@ -54,10 +54,10 @@ public class RoomFinder extends Thread {
 				if(failure) {
 					commandList.removeFirst();
 					failure = false;
-					Bisbat.debug("We had a problem walking somewhere!");
+					//Bisbat.debug("We had a problem walking somewhere!");
 					return null;
 				}
-				Thread.sleep(50); // Optimize with semaphores? !TODO
+				Thread.sleep(100); // Optimize with semaphores? !TODO
 			} catch(InterruptedException e) {
 				Bisbat.debug("InterruptedException: ... not sure what's causing this one!");
 			} catch(Exception e) {
