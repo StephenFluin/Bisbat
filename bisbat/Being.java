@@ -26,6 +26,23 @@ public class Being {
 	 */
 	public int guessMode = 0;
 	
+	/**
+	 * 0 = unknown
+	 * 1 = Less tough than you
+	 * 2 = Same as you
+	 * 3 = Tougher than you.
+	 */
+	public int toughness = 0;
+	
+	/**
+	 * 0 = unknown
+	 * 1 = Couldn't hurt you
+	 * 2 = Medium
+	 * 3 = Could hurt you a lot
+	 */
+	public int strength = 0;
+	
+	
 	public Being(String string) {
 		longDesc = string;
 	}
@@ -67,7 +84,7 @@ public class Being {
 		} else {
 			Pattern p = Pattern.compile("(.*) looks much tougher than you\\..*", Pattern.MULTILINE | Pattern.DOTALL);
 			Pattern p2 = Pattern.compile("You are much tougher than (.*?)\\..*", Pattern.MULTILINE | Pattern.DOTALL);
-			Pattern p3 = Pattern.compile("(.*) looks about as tough as you.\\..*", Pattern.MULTILINE | Pattern.DOTALL);
+			Pattern p3 = Pattern.compile("(.*) looks about as tough as you\\..*", Pattern.MULTILINE | Pattern.DOTALL);
 			//'<--cisbat looks about as tough as you.
 			//cisbat could hurt you a fair amount.'
 			//Neither thing matched
@@ -78,15 +95,37 @@ public class Being {
 				//Bisbat.debug("Someone looks much tougher than us, lets grab '" + m.group(1) + "'.");
 				shortDesc = m.group(1);
 				name = stripOfPronouns(shortDesc);
+				toughness = 3;
 			} else if(m2.matches()) {
 				shortDesc = m2.group(1);
 				name = stripOfPronouns(shortDesc);
+				toughness = 2;
 				
 			} else if(m3.matches()) {
-				shortDesc = m2.group(1);
+				shortDesc = m3.group(1);
 				name = stripOfPronouns(shortDesc);
+				toughness = 1;
 			} else {
 				Bisbat.debug("Nothing matched");
+				return false;
+			}
+			// \n\r?
+			p = Pattern.compile(".*(.*) looks like he could hurt you a lot\\.", Pattern.MULTILINE | Pattern.DOTALL);
+			p2 = Pattern.compile(".*(.*) could hurt you a fair amount\\.", Pattern.MULTILINE | Pattern.DOTALL);
+			p3 = Pattern.compile(".*(.*) probably couldn't hurt you very much\\.", Pattern.MULTILINE | Pattern.DOTALL);
+			m = p.matcher(result);
+			m2 = p2.matcher(result);
+			m3 = p3.matcher(result);
+			
+			if(m.matches()) {
+				Bisbat.debug("Really strong.");
+				strength = 3;
+			} else if (m2.matches()) {
+				Bisbat.debug("kinda strong.");
+				strength = 2;
+			} else if(m3.matches()) {
+				Bisbat.debug("kinda weak.");
+				strength = 1;
 			}
 			setGuessResult(true);
 			return true;
@@ -126,6 +165,6 @@ public class Being {
 	}
 	
 	public String toString() {
-		return (shortDesc == null ? longDesc : shortDesc);
+		return (shortDesc == null ? longDesc : shortDesc) + " Str: " + strength + "/3 Tough: " + toughness + "/3";
 	}
 }
