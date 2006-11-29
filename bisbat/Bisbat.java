@@ -128,41 +128,7 @@ public class Bisbat extends Thread {
 		
 	}
 
-	private void consider(Pair<String,Object> toDoItem) {
-
-		if(toDoItem.right instanceof Being) {
-			Being b = ((Being)toDoItem.right);
-			connection.send("consider " + b.guessName());
-			//debug("Considering a mobile");
-			String result = resultQueue.pop();
-			
-			// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
-			boolean continuu = false;
-			while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
-				if(result.contains("leaves to the")) {
-					debug("Someone left the room and now I am all fuddled.");
-					continuu = true;
-					break;
-				}
-				//debug("Dumping: " + result + " because it didn't match anything we were looking for.");
-				result = resultQueue.pop();
-			}
-			if(continuu) {
-				return;
-			}
-				
-			if(!b.setGuessResult(result)) {
-				toDoList.push(new Pair<String,Object>("consider", b));
-			} else {
-				if(!b.isSureOfName()) {
-					toDoList.push(new Pair<String,Object>("consider", b));
-				}
-			}
-			
-		} else {
-			debug("Consider was added to the toDoList without a being");
-		}
-	}
+	
 
 	public void login() {
 		connection.send(name);
@@ -229,30 +195,48 @@ public class Bisbat extends Thread {
 	
 	/**
 	 * Has Bisbat consider a being found in the game.
-	 * @param being: being found in the game.
+	 * @param toDoItem The toDoItem containing the being we are trying to see.
 	 */
-	public void consider(Being being) {
-		connection.send("consider " + being.guessName());
-		debug("Considering a mobile");
-		String result = resultQueue.pop();
-		
-		// We don't want just any pop, we want a pop in response to our query.  
-		// Dumping all other input for now, later we will have to deal with these.
-		while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
-			debug("Dumping: " + result + " because it didn't match anything we were looking for.");
-			if(result.contains("much tougher than you.")) debug("Much tougher than you matched.");
-			if(result.contains("tough as you.")) debug("Tough as you matched.");
-			if(result.contains("You are much")) debug("You matched.");
-			result = resultQueue.pop();
-		}
-			
-		if(!being.setGuessResult(result)) {
-			toDoList.push(new Pair<String,Object>("consider", being));
-		} else {
-			if(!being.isSureOfName()) {
-				toDoList.push(new Pair<String,Object>("consider", being));
+	private void consider(Pair<String,Object> toDoItem) {
+
+		if(toDoItem.right instanceof Being) {
+			Being b = ((Being)toDoItem.right);
+			String name = b.guessName();
+			if(name == null) {
+				Bisbat.debug("The being is gone or has a really tricky name.");
+				knownBeingList.remove(b);
+				return;
 			}
-		}	
+			connection.send("consider " + name);
+			//debug("Considering a mobile");
+			String result = resultQueue.pop();
+			
+			// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
+			boolean continuu = false;
+			while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
+				if(result.contains("leaves to the")) {
+					debug("Someone left the room and now I am all fuddled.");
+					continuu = true;
+					break;
+				}
+				//debug("Dumping: " + result + " because it didn't match anything we were looking for.");
+				result = resultQueue.pop();
+			}
+			if(continuu) {
+				return;
+			}
+				
+			if(!b.setGuessResult(result)) {
+				toDoList.push(new Pair<String,Object>("consider", b));
+			} else {
+				if(!b.isSureOfName()) {
+					toDoList.push(new Pair<String,Object>("consider", b));
+				}
+			}
+			
+		} else {
+			debug("Consider was added to the toDoList without a being");
+		}
 	}
 	
 	/**
@@ -594,11 +578,13 @@ public class Bisbat extends Thread {
 			connection.send(chosenExit.getDoorCommand()); //open a door if it's there
 		}
 		connection.sendNavigation(chosenExit.direction);
-		Room result = roomFindingThread.pop(true);
+		Room result = roomFindingThread.pop();
 		if(result != null) {
 			currentRoom = result;
 		} else {
+			interrupted = true;
 			return false;
+			
 		}
 		//did we go where we expected to go?
 		if (!exploring) {

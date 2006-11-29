@@ -43,11 +43,13 @@ public class RoomFinder extends Thread {
 		return foundRooms.removeFirst();
 	}
 	
+
+	/**
+	 * Will return the next room we have seen, or null if there was a 
+	 * failure (not enough move points, door closed, etc.).
+	 * @return Room we just found.
+	 */
 	public Room pop() {
-		return pop(true);
-	}
-	
-	public Room pop(boolean discovering) {
 		//Bisbat.print("Waiting for a room."); // debugger
 		while(foundRooms.size() <= 0) {
 			try {
@@ -64,15 +66,12 @@ public class RoomFinder extends Thread {
 				e.printStackTrace();
 			}
 		}
-		//Bisbat.debug("Found a room to pop."); // debugger
-		if(!discovering) {
-			return popFirstRoom();
-		}
+
 		if(bisbat.currentRoom == null) {
 			bisbat.currentRoom = foundRooms.getFirst(); // look at me !TODO replace with removeFirst()?
 		} else {
 			Room temp = searchForMatchingRoom(bisbat.currentRoom, foundRooms.getFirst(), 
-					commandList.getFirst(), discovering);
+					commandList.getFirst());
 			if(temp != null) {
 				// System.out.println("We found a room that matched!  Replacing " + foundRooms.getFirst().title + " with " + tmp.title); // debugger
 				foundRooms.removeFirst();
@@ -89,7 +88,7 @@ public class RoomFinder extends Thread {
 	 *  Room needs to pass 3 tests.  It has to look like a room we know,
 	 *  it has to be at least 2 away, and its spacial relativity must be less than 2.
 	 */
-	static public Room searchForMatchingRoom(Room indexRoom, Room findMe, String command, boolean discovering) {
+	static public Room searchForMatchingRoom(Room indexRoom, Room findMe, String command) {
 		//Bisbat.print("searching for matching room"); // debugger
 		
 		LinkedList<Room> exploredRooms = new LinkedList<Room>();

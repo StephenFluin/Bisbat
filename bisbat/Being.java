@@ -49,13 +49,13 @@ public class Being {
 		if(guessMode == 0) {
 			if(guessLocation >= names.length) {
 				Bisbat.debug("We couldn't figure out the name of the mobile.  There is a chance she left us or her long is misleading");
-				return "!!!Unknown!!!";
+				return null;
 			}
 			return names[guessLocation].substring(0,1);
 		} else {
 			if(guessLocation >= names.length) {
 				Bisbat.debug("We couldn't figure out the name of the mobile.  There is a chance she left us.");
-				return "!!!Unknown!!!";
+				return null;
 			}
 			return names[guessLocation];
 		}
@@ -67,27 +67,26 @@ public class Being {
 		} else {
 			Pattern p = Pattern.compile("(.*) looks much tougher than you\\..*", Pattern.MULTILINE | Pattern.DOTALL);
 			Pattern p2 = Pattern.compile("You are much tougher than (.*?)\\..*", Pattern.MULTILINE | Pattern.DOTALL);
+			Pattern p3 = Pattern.compile("(.*) looks about as tough as you.\\..*", Pattern.MULTILINE | Pattern.DOTALL);
+			//'<--cisbat looks about as tough as you.
+			//cisbat could hurt you a fair amount.'
+			//Neither thing matched
 			Matcher m = p.matcher(result);
 			Matcher m2 = p2.matcher(result);
+			Matcher m3 = p3.matcher(result);
 			if(m.matches()) {
 				//Bisbat.debug("Someone looks much tougher than us, lets grab '" + m.group(1) + "'.");
 				shortDesc = m.group(1);
 				name = stripOfPronouns(shortDesc);
 			} else if(m2.matches()) {
-				try{
-					shortDesc = m2.group(1);
-				} catch(IllegalStateException e) {
-					e.printStackTrace();
-					Bisbat.debug(result);
-					if(p2.matcher(result).matches()) {
-						Bisbat.debug("Error, even though it matches.");
-					}
-					Bisbat.debug(m2.group());
-				}
+				shortDesc = m2.group(1);
 				name = stripOfPronouns(shortDesc);
 				
+			} else if(m3.matches()) {
+				shortDesc = m2.group(1);
+				name = stripOfPronouns(shortDesc);
 			} else {
-				Bisbat.debug("Neither thing matched");
+				Bisbat.debug("Nothing matched");
 			}
 			setGuessResult(true);
 			return true;
