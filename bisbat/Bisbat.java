@@ -5,6 +5,8 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Bisbat extends Thread {
 
@@ -18,10 +20,17 @@ public class Bisbat extends Thread {
 	public Room referenceRoom; //the one room we must assume to be true;
 	public Vector<Being> knownBeingList;
 	public Vector<Item> knownItemList;
+	public Vector<Item> carrying;
 	public RoomFinder roomFindingThread;
 	public ResultQueue resultQueue;
 	public Stack<Pair<String,Object>> toDoList;
 	public boolean interrupted = false;
+	
+	// Character Variables
+	public boolean hungry = false;
+	public boolean thirsty = false;
+	public int health, maxHealth, mana, maxMana, move, maxMove;
+	
 	
 	
 	/**
@@ -35,10 +44,17 @@ public class Bisbat extends Thread {
 		prompt = "";
 		knownBeingList = new Vector<Being>();
 		knownItemList = new Vector<Item>();
+		carrying = new Vector<Item>();
 		roomFindingThread = new RoomFinder(this);
 		roomFindingThread.start();
 		resultQueue  = new ResultQueue();
 	 	toDoList = new Stack<Pair<String,Object>>();
+
+	 	// Set initial objectives
+	 	toDoList.push(new Pair<String,Object>("survive", null));
+	 	toDoList.push(new Pair<String,Object>("level", null));
+	 	toDoList.push(new Pair<String,Object>("reference", null));
+	 	toDoList.push(new Pair<String,Object>("explore", null));
 	}
 
 	/**
@@ -53,39 +69,71 @@ public class Bisbat extends Thread {
 	 	//print out the start of the clock.
 	 	print("Starting objectives");
 	 	
-	 	// Set initial objectives
-	 	toDoList.push(new Pair<String,Object>("survive", null));
-	 	toDoList.push(new Pair<String,Object>("reference", null));
-	 	toDoList.push(new Pair<String,Object>("explore", null));
+
 	 	
 	 	// Determine next objective and act accordingly
 	 	while(toDoList.size() > 0) {
 	 		Pair<String,Object> toDoItem = toDoList.pop();
 	 		interrupted = false;
-	 		if(toDoItem.left.equals("explore")) {
+	 		if(toDoItem.left.equals("survive")) {
+		 		survive();
+	 		} else if(toDoItem.left.equals("level")) {
+	 			level();
+	 		} else if(toDoItem.left.equals("findFood")) {
+	 			findFood();
+	 		} else if(toDoItem.left.equals("findDrink")) {
+	 			findDrink();
+	 		} else if(toDoItem.left.equals("reference")) {
+	 			returnToReference();
+	 			currentRoom.printCount(); //debug
+	 		} else if(toDoItem.left.equals("explore")) {
 	 			explore();
 	 		} else if(toDoItem.left.equals("consider")) {
 	 			consider(toDoItem);
 	 		} else if(toDoItem.left.equals("sleep")) {
 				sleep((Integer)toDoItem.right);
-	 		} else if(toDoItem.left.equals("survive")) {
-	 			survive();
 	 		} else if(toDoItem.left.equals("confirm")) {
 	 			confirm();	 			
-	 		} else if(toDoItem.left.equals("reference")) {
-	 			returnToReference();
-	 			currentRoom.printCount(); //debug
 	 		}
 	 	}
 	 	connection.send("quit");
 	}
 	
+	private void findDrink() {
+		updateCarrying();
+		
+	}
+
+	private void findFood() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * Uses the "inventory" command to update our knowledge of what we are carrying.
+	 *
+	 */
+	private void updateCarrying() {
+		connection.send("inventory");
+		String result = resultQueue.pop();
+	}
+
+	/**
+	 * Bisbat will do this when the goal is to gain experience, 
+	 * with the ultimate goal of gaining in level.
+	 *
+	 */
+	private void level() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void consider(Pair<String,Object> toDoItem) {
 
 		if(toDoItem.right instanceof Being) {
 			Being b = ((Being)toDoItem.right);
 			connection.send("consider " + b.guessName());
-			debug("Considering a mobile");
+			//debug("Considering a mobile");
 			String result = resultQueue.pop();
 			
 			// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
@@ -153,7 +201,7 @@ public class Bisbat extends Thread {
 			
 			//we should now be at a room with an unexplored exit (if not, then there are non!)
 			if(currentRoom.getRandomUnexploredExit() == null) {
-				debug("We are trying to explore, but there are no known unexplored exits");
+				//debug("We are trying to explore, but there are no known unexplored exits");
 				return;
 			}
 			
@@ -225,6 +273,24 @@ public class Bisbat extends Thread {
 	 * Instructs Bisbat to simply survive in the environment.
 	 */
 	public void survive() {
+		if(hungry) {
+			toDoList.push(new Pair<String,Object>("survive", null));
+			toDoList.push(new Pair<String,Object>("findFood", null));
+			return;
+		}
+		if(thirsty) {
+			toDoList.push(new Pair<String,Object>("survive", null));
+			toDoList.push(new Pair<String,Object>("findDrink", null));
+			return;
+		}
+		if(health != maxHealth || move != maxMove || mana != maxMana) {
+			debug("Sleeping to regain something. " + health + "/" + maxHealth + " " +
+					 								 mana + "/" + maxMana + " " +
+													 move + "/" + maxMove);
+			toDoList.push(new Pair<String,Object>("survive", null));
+			toDoList.push(new Pair<String,Object>("sleep", 30));
+			return;
+		}
 		print("Good job, we have done everything we can in this game.");
 		try{
 			Thread.sleep(30000);
@@ -383,18 +449,35 @@ public class Bisbat extends Thread {
 		return null; // no unexplored exits found in knowledge base
 	}
 	
-	public void setUpPrompt() {
-		prompt = "<prompt>%c";
-		connection.send("prompt " + prompt);
-		
-	}
+	
 	public String getPrompt() {
 		return prompt;
 	}
 	public String getPromptMatch() {
 		String s = getPrompt().replaceAll("%c", ".?.?");
-		s = s.replaceAll("%.", "\\\\d+");
+		s = s.replaceAll("%.", "(\\\\d+)");
 		return s;
+	}
+	public void setUpPrompt() {
+		prompt = "<prompt %h/%H %m/%M %v/%V>%c";
+		connection.send("prompt " + prompt);
+		
+	}
+	public void updateWithPrompt(String promptString) {
+		Pattern p = Pattern.compile(getPromptMatch());
+		Matcher m = p.matcher(promptString);
+		if(!m.matches()) {
+			debug("Having trouble matching " + promptString + " and " + getPromptMatch());
+		} else {
+			//debug("Should be fine.");
+		}
+		
+		health = new Integer(m.group(1));
+		maxHealth = new Integer(m.group(2));
+		mana = new Integer(m.group(3));
+		maxMana = new Integer(m.group(4));
+		move = new Integer(m.group(5));
+		maxMove = new Integer(m.group(6));
 	}
 
 	public void foundRoom(Room recentlyDiscoveredRoom) {
