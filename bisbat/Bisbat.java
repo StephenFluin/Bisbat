@@ -84,8 +84,9 @@ public class Bisbat extends Thread {
 	 		} else if(toDoItem.left.equals("findDrink")) {
 	 			findDrink();
 	 		} else if(toDoItem.left.equals("reference")) {
+	 			returnToUnique();
+	 		} else if(toDoItem.left.equals("firstRoom")) {
 	 			returnToReference();
-	 			currentRoom.printCount(); //debug
 	 		} else if(toDoItem.left.equals("explore")) {
 	 			explore();
 	 		} else if(toDoItem.left.equals("consider")) {
@@ -141,6 +142,7 @@ public class Bisbat extends Thread {
 		roomFindingThread.add("look");
 		currentRoom = roomFindingThread.pop();
 		referenceRoom = currentRoom;
+		referenceRoom.print();
 		currentRoom.confirm(); // first room must be confirmed
 	}
 	
@@ -489,32 +491,47 @@ public class Bisbat extends Thread {
 		return true; // done following the path
 	}
 	
+	
+	
 	/**
 	 * instructs bisbat to return to our refernce room.
 	 * If he find his way this will add explore to the todoList.
+	 * not just a uniquely idnetified room.
 	 * Returns true if it failed
 	 */
 	public boolean returnToReference(){
+		return returnTo(true);
+	}
+	
+	public boolean returnToUnique(){
+		return returnTo(false);
+	}
+	
+	private boolean returnTo (boolean toFirstRoom){
 		ArrayList<Exit> path = new ArrayList<Exit>();
 		LinkedList<Room> exploredRooms = new LinkedList<Room>();
 		LinkedList<Room> searchQueue = new LinkedList<Room>();
 		searchQueue.add(currentRoom);
 		
-		while(searchQueue.size() > 0) {
-			Room temp = searchQueue.removeFirst();
-			LinkedList<Room> rooms = RoomFinder.searchForAllMatchingRooms(referenceRoom,temp);
-			if(!exploredRooms.contains(temp)) {
-				exploredRooms.add(temp);
-			} else {
-				continue;
-			}
-			if(rooms == null || rooms.isEmpty() || rooms.size() == 1) {
-				path = RoomFinder.searchForPathBetweenRooms(currentRoom, referenceRoom);
-				break;
-			} else {
-				for(Exit e : temp.exits) {
-					if(e.nextRoom != null) {
-						searchQueue.add(e.nextRoom);
+		if (toFirstRoom) {
+			path = RoomFinder.searchForPathBetweenRooms(currentRoom, referenceRoom);
+		} else {
+			while(searchQueue.size() > 0) {
+				Room temp = searchQueue.removeFirst();
+				LinkedList<Room> rooms = RoomFinder.searchForAllMatchingRooms(referenceRoom,temp);
+				if(!exploredRooms.contains(temp)) {
+					exploredRooms.add(temp);
+				} else {
+					continue;
+				}
+				if(rooms == null || rooms.isEmpty() || rooms.size() == 1) {
+					path = RoomFinder.searchForPathBetweenRooms(currentRoom, temp);
+					break;
+				} else {
+					for(Exit e : temp.exits) {
+						if(e.nextRoom != null) {
+							searchQueue.add(e.nextRoom);
+						}
 					}
 				}
 			}
@@ -531,7 +548,6 @@ public class Bisbat extends Thread {
 				} 
 			}
 			connection.send("save");
-			
 			return true;
 		}
 	}
@@ -689,7 +705,7 @@ public class Bisbat extends Thread {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Bisbat alpha = new Bisbat("Bisbat", "alpha");
+		Bisbat alpha = new Bisbat("cisbat", "alpha");
 		alpha.start(); 
 	}
 	

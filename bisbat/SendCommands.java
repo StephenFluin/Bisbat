@@ -64,10 +64,14 @@ public class SendCommands extends Thread {
 			bisbat.toDoList.add(new Pair<String,Object>("sleep",10));
 		} else if (command.equalsIgnoreCase("printRoom")) {
 			Bisbat.print(bisbat.currentRoom.toString());
+		} else if (command.equalsIgnoreCase("printReference")) {
+			Bisbat.print(bisbat.referenceRoom.toString());
 		} else if (command.equalsIgnoreCase("foundRooms")) {
 			Bisbat.print("" + bisbat.roomFindingThread.isEmpty());
 		} else if (command.equalsIgnoreCase("reference")) {
-			bisbat.returnToReference();
+			bisbat.toDoList.add(new Pair<String,Object>("reference",null));
+		} else if (command.equalsIgnoreCase("return")) {
+			bisbat.toDoList.add(new Pair<String,Object>("firstRoom",null));
 		} else if(command.equalsIgnoreCase("count")) {
 			bisbat.currentRoom.printCount();
 		} else {
