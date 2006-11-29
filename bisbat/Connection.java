@@ -42,5 +42,11 @@ public class Connection {
 		send(command);
 		bisbat.roomFindingThread.add(command);
 	}
-	
+	public void close() {
+		try{
+			socket.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
