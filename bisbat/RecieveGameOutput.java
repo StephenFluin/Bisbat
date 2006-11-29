@@ -48,6 +48,7 @@ public class RecieveGameOutput extends Thread {
 				return;
 			}
 		}
+		bisbat.connection.close();
 	}
 
 	/**
@@ -108,6 +109,8 @@ public class RecieveGameOutput extends Thread {
 				bisbat.hungry = true;
 			} else if (string.contains("Your mouth feels drier")) {
 				bisbat.thirsty = true;
+			} else if(string.contains("Cisbat arrives from the")) {
+				bisbat.connection.send("say hi Cisbat!");
 			} else if(string.length() < 1) {
 				
 			} else {
