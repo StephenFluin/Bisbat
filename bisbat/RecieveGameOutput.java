@@ -26,6 +26,7 @@ public class RecieveGameOutput extends Thread {
 				} else if(!line.equals("")) {
 					line = decolor(line);
 					if(line.matches(bisbat.getPromptMatch())) {
+						bisbat.updateWithPrompt(line);
 						//Handle the buffer then clear it.
 						//Bisbat.debug("Found the prompt!  Handling contents of buffer."); // debugger
 						//Bisbat.debug(buffer);
@@ -103,6 +104,10 @@ public class RecieveGameOutput extends Thread {
 					bisbat.toDoList.add(new Pair<String,Object>("sleep",20));
 					bisbat.roomFindingThread.failure();
 
+			} else if (string.contains("Your stomach feels a little emptier")) {
+				bisbat.hungry = true;
+			} else if (string.contains("Your mouth feels drier")) {
+				bisbat.thirsty = true;
 			} else if(string.length() < 1) {
 				
 			} else {
