@@ -208,22 +208,18 @@ public class Bisbat extends Thread {
 				return;
 			}
 			connection.send("consider " + name);
-			//debug("Considering a mobile");
+			debug("Considering '" + name + "'.");
 			String result = resultQueue.pop();
 			
 			// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
-			boolean continuu = false;
 			while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
 				if(result.contains("leaves to the")) {
 					debug("Someone left the room and now I am all fuddled.");
-					continuu = true;
-					break;
+					knownBeingList.remove(b);
+					return;
 				}
 				//debug("Dumping: " + result + " because it didn't match anything we were looking for.");
 				result = resultQueue.pop();
-			}
-			if(continuu) {
-				return;
 			}
 				
 			if(!b.setGuessResult(result)) {
