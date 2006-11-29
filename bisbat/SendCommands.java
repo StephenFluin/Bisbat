@@ -32,25 +32,7 @@ public class SendCommands extends Thread {
 						//if(command.equals("exit")) {
 							//throw(new NullPointerException());
 						//} else
-						if(command.equalsIgnoreCase("printTree")) {
-							bisbat.currentRoom.printTree();
-						} else if(command.equalsIgnoreCase("printToDo")) {
-							Bisbat.print(bisbat.toDoList.toString());
-						} else if(command.equalsIgnoreCase("moblist")) {
-							Bisbat.print(bisbat.knownBeingList.toString());
-						} else if(command.equalsIgnoreCase("sleep")) {
-							bisbat.toDoList.add(new Pair<String,Object>("sleep",10));
-						} else if (command.equalsIgnoreCase("printRoom")) {
-							Bisbat.print(bisbat.currentRoom.toString());
-						} else if (command.equalsIgnoreCase("foundRooms")) {
-							Bisbat.print("" + bisbat.roomFindingThread.isEmpty());
-						} else if (command.equalsIgnoreCase("reference")) {
-							bisbat.returnToReference();
-						} else if(command.equalsIgnoreCase("count")) {
-							bisbat.currentRoom.printCount();
-						} else {
-							out.println(command);
-						}
+						handleUserCommand(command);
 						command = reader.readLine();
 					} catch(Exception e) {
 						continue;
@@ -69,6 +51,28 @@ public class SendCommands extends Thread {
 		out.write(s + "\n");
 		out.flush();
 		System.out.print("-> " + s + "\n");
+	}
+	
+	public void handleUserCommand(String command) {
+		if(command.equalsIgnoreCase("printTree")) {
+			bisbat.currentRoom.printTree();
+		} else if(command.equalsIgnoreCase("printToDo")) {
+			Bisbat.print(bisbat.toDoList.toString());
+		} else if(command.equalsIgnoreCase("moblist")) {
+			Bisbat.print(bisbat.knownBeingList.toString());
+		} else if(command.equalsIgnoreCase("sleep")) {
+			bisbat.toDoList.add(new Pair<String,Object>("sleep",10));
+		} else if (command.equalsIgnoreCase("printRoom")) {
+			Bisbat.print(bisbat.currentRoom.toString());
+		} else if (command.equalsIgnoreCase("foundRooms")) {
+			Bisbat.print("" + bisbat.roomFindingThread.isEmpty());
+		} else if (command.equalsIgnoreCase("reference")) {
+			bisbat.returnToReference();
+		} else if(command.equalsIgnoreCase("count")) {
+			bisbat.currentRoom.printCount();
+		} else {
+			out.println(command);
+		}
 	}
 
 }
