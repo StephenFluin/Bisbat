@@ -35,6 +35,7 @@ public class SendCommands extends Thread {
 						handleUserCommand(command);
 						command = reader.readLine();
 					} catch(Exception e) {
+						e.printStackTrace();
 						continue;
 					}
 			}
@@ -50,7 +51,7 @@ public class SendCommands extends Thread {
 	public void send(String s) {
 		out.write(s + "\n");
 		out.flush();
-		System.out.print("-> " + s + "\n");
+		//System.out.print("-> " + s + "\n");
 	}
 	
 	public void handleUserCommand(String command) {
@@ -73,7 +74,11 @@ public class SendCommands extends Thread {
 		} else if (command.equalsIgnoreCase("return")) {
 			bisbat.toDoList.add(new Pair<String,Object>("firstRoom",null));
 		} else if(command.equalsIgnoreCase("count")) {
+			System.out.println("Rooms known from the reference room:");
+			bisbat.referenceRoom.printCount();
+			System.out.println("Rooms known from the CURRENT room:");
 			bisbat.currentRoom.printCount();
+			
 		} else {
 			out.println(command);
 		}
