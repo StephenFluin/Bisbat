@@ -96,13 +96,13 @@ public class Being {
 				shortDesc = m.group(1);
 				name = stripOfPronouns(shortDesc);
 				toughness = 3;
-			} else if(m2.matches()) {
-				shortDesc = m2.group(1);
+			} else if(m3.matches()) {
+				shortDesc = m3.group(1);
 				name = stripOfPronouns(shortDesc);
 				toughness = 2;
 				
-			} else if(m3.matches()) {
-				shortDesc = m3.group(1);
+			} else if(m2.matches()) {
+				shortDesc = m2.group(1);
 				name = stripOfPronouns(shortDesc);
 				toughness = 1;
 			} else {
@@ -165,6 +165,6 @@ public class Being {
 	}
 	
 	public String toString() {
-		return (shortDesc == null ? longDesc : shortDesc) + " Str: " + strength + "/3 Tough: " + toughness + "/3";
+		return (shortDesc == null ? longDesc : shortDesc) + " (" + strength + "," + toughness + ") -" + longDesc;
 	}
 }
