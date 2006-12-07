@@ -102,25 +102,26 @@ public class RecieveGameOutput extends Thread {
 			//System.out.println("~~~~~ Not a Room! ~~~~~"); // debugger
 			string = string.trim();
 			 // print non-room recieved game information
-			if(string.contains("You are too tired to go there now.")) {
-					bisbat.toDoList.add(new Pair<String,Object>("sleep",20));
-					bisbat.roomFindingThread.failure();
+			if(string.startsWith("You are too tired to go there now.")) {
+				Bisbat.debug("To tired, must rest.");	
+				bisbat.toDoList.add(new Pair<String,Object>("sleep",20));
+				bisbat.roomFindingThread.failure();
 
-			} else if (string.contains("Your stomach feels a little emptier")) {
+			} else if (string.startsWith("Your stomach feels a little emptier")) {
 				bisbat.hungry = true;
-			} else if (string.contains("Your mouth feels drier")) {
+			} else if (string.startsWith("Your mouth feels drier")) {
 				bisbat.thirsty = true;
-			} else if(string.contains("Cisbat arrives from the")) {
-				bisbat.connection.send("say hi Cisbat!");
-			} else if(string.contains("You are now standing.")) {
-			} else if(string.contains("You are now sleeping.")) {
-			} else if(string.contains("You save your progress.")) {	
-			} else if(string.contains("You can't do that while sleeping!")) { 
-				bisbat.connection.send("wake");
-				bisbat.connection.send("quit");
+			} else if(string.startsWith("\\.isbat arrives from the")) {
+				bisbat.connection.send("say hi Bisbat!");
+			} else if(string.equals("You are now standing.")) {
+			} else if(string.equals("You are now sleeping.")) {
+			} else if(string.equals("The door is already open.")) {
+			} else if(string.equals("You save your progress.")) {	
+			} else if(string.contains("Congratulations! You have attained level ")) { 
+				bisbat.connection.send("chat @={===LEVEL===>");
+				bisbat.leveledRecently = true;
 			} else if(string.length() < 1) {				
 			} else {
-				System.out.println("'<--" + string + "'");
 				bisbat.resultQueue.add(string);
 			}
 		}

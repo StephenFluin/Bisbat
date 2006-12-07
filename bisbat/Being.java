@@ -9,11 +9,16 @@ public class Being {
 	public String name, shortDesc, longDesc;
 	public int hp, maxhp;
 	
+
+	public int fights = 0;
+	public double averageExperience;
+	public double averageDamage;
+	
+	public int maxDamage = 0;
+	
 	/**
-	 * Contains a list of total damages dealt by this mobile for 
-	 * each fight.
+	 * The list of rooms that we have seen this mobile in.
 	 */
-	public Vector<Integer> damageHistory = new Vector<Integer>();
 	public Vector<Room> seenIn = new Vector<Room>();
 	public int guessLocation = 0;
 	
@@ -60,6 +65,17 @@ public class Being {
 	public boolean isSureOfName() {
 		return (name!=null && name.length() > 2);
 	}
+	
+	public void addFightData(int damage, int experience) {
+		fights++;
+		averageDamage = 	(averageDamage * (fights-1)/fights) + ((double)damage/fights);
+		averageExperience = (averageExperience*(fights-1)/fights)+((double)experience/fights);
+		if(maxDamage < damage) {
+			maxDamage = damage;
+		}
+		
+	}
+
 	
 	public String guessName() {
 		String[] names = longDesc.split(" ");
@@ -150,15 +166,17 @@ public class Being {
 				}
 			}
 		} else {
-			if(guessMode == 0) {
-				guessLocation++;
-				if(guessLocation >= longDesc.length()) {
-					guessMode = 2;
-				}
-			} else if(guessMode == 1) {
-				guessLocation++;
-				if(guessLocation >= longDesc.length()) {
-					guessMode = 2;
+			if(!isSureOfName()) {
+				if(guessMode == 0) {
+					guessLocation++;
+					if(guessLocation >= longDesc.length()) {
+						guessMode = 2;
+					}
+				} else if(guessMode == 1) {
+					guessLocation++;
+					if(guessLocation >= longDesc.length()) {
+						guessMode = 2;
+					}
 				}
 			}
 		}
@@ -172,6 +190,6 @@ public class Being {
 	}
 	
 	public String toString() {
-		return (shortDesc == null ? longDesc : shortDesc) + " (" + strength + "," + toughness + ") -" + longDesc;
+		return (shortDesc == null ? longDesc : shortDesc) + " (S:" + strength +  ((fights > 0) ? (",F:" + fights + ",AD:" + averageDamage + ",AE:" + averageExperience) : "")  + ")";
 	}
 }

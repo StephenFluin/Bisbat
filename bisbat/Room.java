@@ -20,6 +20,10 @@ public class Room {
 	public ArrayList<Exit> exits = new ArrayList<Exit>();
 	public String description = new String();
 	public String title = new String();
+	
+	/**
+	 * The list of actual beings in the room.
+	 */
 	public Vector<Being> beings = new Vector<Being>();
 	public Vector<Item> items = new Vector<Item>();
 	boolean confirmed = false;

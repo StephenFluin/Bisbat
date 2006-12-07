@@ -51,6 +51,7 @@ public class RoomFinder extends Thread {
 	 */
 	public Room pop() {
 		//Bisbat.print("Waiting for a room."); // debugger
+		int count = 0;
 		while(foundRooms.size() <= 0) {
 			try {
 				if(failure) {
@@ -59,12 +60,19 @@ public class RoomFinder extends Thread {
 					//Bisbat.debug("We had a problem walking somewhere!");
 					return null;
 				}
-				Thread.sleep(100); // Optimize with semaphores? !TODO
+				/*
+				 * 140 is the average time for a room (lag), we check every 70 then.
+				 */
+				Thread.sleep(70); // Optimize with semaphores? !TODO
+				count++;
 			} catch(InterruptedException e) {
 				Bisbat.debug("InterruptedException: ... not sure what's causing this one!");
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
+		}
+		if(count > 0) {
+			//Bisbat.debug("Waited " + count + " loops for a room.");
 		}
 
 		if(bisbat.currentRoom == null) {

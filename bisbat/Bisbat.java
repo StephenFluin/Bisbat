@@ -17,6 +17,7 @@ public class Bisbat extends Thread {
 	public String password;
 	private String prompt;
 	public Room currentRoom;
+	
 	public Room referenceRoom; //the one room we must assume to be true;
 	public Vector<Being> knownBeingList;
 	public Vector<Item> knownItemList;
@@ -31,6 +32,10 @@ public class Bisbat extends Thread {
 	public boolean thirsty = false;
 	public int health, maxHealth, mana, maxMana, move, maxMove;
 	public int boredom;
+	public int experience;
+	public int killThreshhold = 1;
+	public boolean leveledRecently = false;
+	
 	
 	
 	
@@ -55,6 +60,7 @@ public class Bisbat extends Thread {
 	 	toDoList.push(new Pair<String,Object>("survive", null));
 	 	toDoList.push(new Pair<String,Object>("reference", null));
 	 	toDoList.push(new Pair<String,Object>("explore", null));
+	 	leveledRecently = false;
 	}
 
 	/**
@@ -99,6 +105,10 @@ public class Bisbat extends Thread {
 	 			kill(((Being)toDoItem.right));
 	 		} else if(toDoItem.left.equals("confirm")) {
 	 			confirm();	 			
+	 		} else if(toDoItem.left.equals("levelUpActions")) {
+	 			levelUpActions();
+	 		} else if(toDoItem.left.equals("reconsider")) {
+	 			reConsider();
 	 		} else {
 	 			debug("Didn't know what to do with: " + toDoItem.left);
 	 		}
@@ -107,11 +117,77 @@ public class Bisbat extends Thread {
 	}
 	
 	private void kill(Being being) {
+		debug("Killing------------");
+		resultQueue.listen();
 		connection.send("say Hey " + being.shortDesc + ", I'm about to kill you!");
 		boredom = 0;
+		int totalDamage = 0;
+		int exp = experience;
 		connection.send("kill " + being.name);
+		//Fight happens here.
+		String result;
+		Pattern p = Pattern.compile("s you\\.\\[(\\d+) damage\\]");
+		do{
+			result = resultQueue.pop();
+			Matcher m = p.matcher(result);
+			if(result.startsWith("You KILLED")) {
+				debug("We won the fight!");
+				break;
+			} else if (result.startsWith("You don't see")) {
+				debug("The '" + being.name + "' left or were not here to start off with!");
+				break;
+			} else if (m.find()) {
+				int damage = new Integer(m.group(1));
+				//debug("They hurt me by " + damage);
+				totalDamage += damage;
+				
+			} else {
+				resultQueue.notMine(result);
+			}
+		} while(result != null);
+		
+		resultQueue.unlisten();
+		exp = experience - exp;
+		being.addFightData(totalDamage, exp);
+		
+		currentRoom.beings.remove(being);
+		debug("-----------Done Killing");
 	}
 
+	private void reConsider() {
+		debug("Reconsidering all of the mobiles because we leveled up.");
+		for(int i = 0;i< knownBeingList.size();i++) {
+			Being b = knownBeingList.get(i);
+			for(Room r : b.seenIn) {
+				walkToRoomIfKnown(r);
+				if(currentRoom.beings.contains(b)) {
+					if(reConsider(b)) {
+						break;
+					}
+				}
+			}
+			
+		}
+	}
+	private boolean reConsider(Being b) {
+		resultQueue.listen();
+		connection.send("consider " + b.name);
+		String result;
+		result = resultQueue.pop();
+		while(!result.startsWith("You don't see") && !result.contains("looks much tougher than you") && !result.contains("looks about as tough as you") && !result.contains("You are much tougher")) {
+			resultQueue.notMine(result);
+			result = resultQueue.pop();
+		}
+		
+		resultQueue.unlisten();
+		return b.setGuessResult(result); 
+		
+	}
+	private void levelUpActions() {
+		toDoList.add(new Pair<String,Object>("reconsider", null));
+		leveledRecently = false;
+	}
+	
 	private void getHere(Item item) {
 		
 		
@@ -119,11 +195,12 @@ public class Bisbat extends Thread {
 
 	private void findDrink() {
 		updateCarrying();
-		
+		thirsty = false;
 	}
 
 	private void findFood() {
-		// TODO Auto-generated method stub
+		updateCarrying();
+		hungry = false;
 		
 	}
 	
@@ -132,6 +209,7 @@ public class Bisbat extends Thread {
 	 *
 	 */
 	private void updateCarrying() {
+		resultQueue.listen();
 		connection.send("inventory");
 		String result = resultQueue.pop();
 		while(result != null) {
@@ -147,9 +225,13 @@ public class Bisbat extends Thread {
 				result = null;
 			} else {
 				// Not what we are waiting for, pop!;
+				resultQueue.notMine(result);
 				result = resultQueue.pop();
 			}
 		}
+		
+		resultQueue.unlisten();
+		debug("Updated carrying to contain: " + carrying);
 	}
 
 	/**
@@ -159,20 +241,52 @@ public class Bisbat extends Thread {
 	 *
 	 */
 	private void level(Object object) {
-		
-		int thresh = 2;
+
+		// Only 2 phases, first phase we kill everything under the threshold once.
+		// Second phase, we kill repeatedly the things that are the best exp.
 		for(Being b : knownBeingList) {
-			if((b.strength + b.toughness) <= thresh) {
+			if(b.strength <= killThreshhold) {
+				if(b.fights > 0) {
+					//First iteration will skip this guy. 
+					continue;
+				}
+				debug("We have seen " + b.shortDesc + b.seenIn);
 				for(Room r : b.seenIn) {
 					debug("Walking to the location of " + b.shortDesc);
 					walkToRoomIfKnown(r);
-					if(b.seenIn.contains(currentRoom)) {
+					if(currentRoom.beings.contains(b)) {
 						toDoList.add(new Pair<String,Object>("kill", b));
 						return;
 					}
 				}
 			}
+				
 		}
+		debug("We have fought everyone within the threshold at least once.");
+		double maxExpPerDamage = 0;
+		Being best = null;
+		for(Being b : knownBeingList) {
+			if(b.averageDamage != 0 && (b.averageExperience/b.averageDamage > maxExpPerDamage)) {
+				maxExpPerDamage = b.averageExperience/b.averageDamage;
+				best = b;
+				
+			}
+		}
+		if(best == null) {
+			// SHould not happen, could happen if all beings did 0 damage.
+			Thread.dumpStack();
+		} else {
+			for(Room r : best.seenIn) {
+				debug("Walking to the location of " + best.shortDesc + " to kill them, because they give the best exp.");
+				walkToRoomIfKnown(r);
+				if(currentRoom.beings.contains(best)) {
+					toDoList.add(new Pair<String,Object>("kill", best));
+					return;
+				}
+			}
+		}
+		
+			
 		
 	}
 
@@ -256,8 +370,9 @@ public class Bisbat extends Thread {
 				knownBeingList.remove(b);
 				return;
 			}
+			resultQueue.listen();
 			connection.send("consider " + name);
-			debug("Considering '" + name + "'.");
+			//debug("Considering '" + name + "'.");
 			String result = resultQueue.pop();
 			
 			// We don't want just any pop, we want a pop in response to our query.  Dumping all other input for now, later we will have to deal with these.
@@ -268,8 +383,11 @@ public class Bisbat extends Thread {
 					return;
 				}
 				//debug("Dumping: " + result + " because it didn't match anything we were looking for.");
+				resultQueue.notMine(result);
 				result = resultQueue.pop();
 			}
+			
+			resultQueue.unlisten();
 				
 			if(!b.setGuessResult(result)) {
 				toDoList.push(new Pair<String,Object>("consider", b));
@@ -314,11 +432,16 @@ public class Bisbat extends Thread {
 			return;
 		}
 		
-		if(health != maxHealth || mana != maxMana) {
+		if(health < (maxHealth*.9) || mana < (.9*maxMana)) {
 			heal();
 			return;
 		}
-		if(boredom > 0) {
+		if(leveledRecently == true) {
+			toDoList.push(new Pair<String,Object>("levelUpActions",null));
+			
+			return;
+		}
+		if(boredom >= 0) {
 			toDoList.push(new Pair<String,Object>("level",null));
 			return;
 		}
@@ -340,7 +463,7 @@ public class Bisbat extends Thread {
 		debug("Sleeping to regain something. " + health + "/" + maxHealth + " " +
 				 mana + "/" + maxMana + " " +
 				 move + "/" + maxMove);
-		toDoList.push(new Pair<String,Object>("sleep", 30));
+		toDoList.push(new Pair<String,Object>("sleep", 10));
 		connection.send("save");
 	}
 	
@@ -500,10 +623,11 @@ public class Bisbat extends Thread {
 	public String getPromptMatch() {
 		String s = getPrompt().replaceAll("%c", ".?.?");
 		s = s.replaceAll("%.", "(\\\\d+)");
+		s = s.replaceAll("&.", "");
 		return s;
 	}
 	public void setUpPrompt() {
-		prompt = "<prompt %h/%H %m/%M %v/%V>%c";
+		prompt = "&W<prompt %h/%H %m/%M %v/%V %x>%c";
 		connection.send("prompt " + prompt);
 		
 	}
@@ -522,6 +646,7 @@ public class Bisbat extends Thread {
 		maxMana = new Integer(m.group(4));
 		move = new Integer(m.group(5));
 		maxMove = new Integer(m.group(6));
+		experience = new Integer(m.group(7));
 	}
 
 	public void foundRoom(Room recentlyDiscoveredRoom) {
@@ -538,6 +663,7 @@ public class Bisbat extends Thread {
 		ArrayList<Exit> path = null;
 		try {
 			path = RoomFinder.searchForPathBetweenRooms(currentRoom, walkMeToHere);
+			debug("Path is " + path.size() + " long.");
 		} catch(OutOfMemoryError e) {
 			System.out.println("Path betwen rooms -> out of memory!");
 		}
@@ -734,6 +860,10 @@ public class Bisbat extends Thread {
 	}
 	
 	public void addKnowledgeOf(Item i) {
+		if(i == null) {
+			debug("You are trying to add knowledge of a null, this is a problem.");
+			return;
+		}
 		if(!knownItemList.contains(i)) {
 			knownItemList.add(i);
 			toDoList.push(new Pair<String,Object>("getHere", i));
@@ -749,7 +879,7 @@ public class Bisbat extends Thread {
 			toDoList.push(new Pair<String,Object>("consider", b));
 		} else {
 			
-			addReciprocol(b, currentRoom);
+			//addReciprocol(b, currentRoom);
 		}
 	}
 

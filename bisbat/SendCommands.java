@@ -61,7 +61,9 @@ public class SendCommands extends Thread {
 		} else if(command.equalsIgnoreCase("printToDo")) {
 			Bisbat.print(bisbat.toDoList.toString());
 		} else if(command.equalsIgnoreCase("moblist")) {
-			Bisbat.print(bisbat.knownBeingList.toString());
+			for(Being b : bisbat.knownBeingList) {
+				Bisbat.print(b.toString());
+			}
 		} else if(command.equalsIgnoreCase("sleep")) {
 			bisbat.toDoList.add(new Pair<String,Object>("sleep",10));
 		} else if (command.equalsIgnoreCase("printRoom")) {

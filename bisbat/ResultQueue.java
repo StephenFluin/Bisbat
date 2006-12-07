@@ -5,13 +5,19 @@ import java.util.Vector;
 public class ResultQueue {
 	
 	private Vector<String> results;
+	private boolean listening;
 	
 	public ResultQueue() {
 		results = new Vector<String>();
+		listening = false;
 	}
 	
 	public void add(String s) {
-		results.add(s);
+		if(!listening) {
+			notMine(s);
+		} else {
+			results.add(s);
+		}
 	}
 	
 	/**
@@ -35,5 +41,14 @@ public class ResultQueue {
 		return results.remove(0);
 	}
 
+	public void listen() {
+		listening = true;
+	}
+	public void unlisten() {
+		listening = false;
+	}
+	public void notMine(String msg) {
+		System.out.println("<--'" + msg + "'"); 
+	}
 
 }
