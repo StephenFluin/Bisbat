@@ -14,4 +14,7 @@ public class Item {
 	public boolean equals(Item other) {
 		return longDesc.equalsIgnoreCase(other.longDesc);
 	}
+	public String getShort() {
+		return shortDesc;
+	}
 }

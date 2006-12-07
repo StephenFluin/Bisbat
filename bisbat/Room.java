@@ -101,6 +101,10 @@ public class Room {
 		for(Exit e : exits) {
 			result += e.getDirection() + "\t";
 		}
+		result += "\nBeings:";
+		for(Being b : beings) {
+			result += b.shortDesc + "\t";
+		}
 		return result;
 	}
 	

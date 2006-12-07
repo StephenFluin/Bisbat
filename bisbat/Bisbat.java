@@ -30,6 +30,7 @@ public class Bisbat extends Thread {
 	public boolean hungry = false;
 	public boolean thirsty = false;
 	public int health, maxHealth, mana, maxMana, move, maxMove;
+	public int boredom;
 	
 	
 	
@@ -52,7 +53,6 @@ public class Bisbat extends Thread {
 
 	 	// Set initial objectives
 	 	toDoList.push(new Pair<String,Object>("survive", null));
-	 	toDoList.push(new Pair<String,Object>("level", null));
 	 	toDoList.push(new Pair<String,Object>("reference", null));
 	 	toDoList.push(new Pair<String,Object>("explore", null));
 	}
@@ -77,8 +77,6 @@ public class Bisbat extends Thread {
 	 		interrupted = false;
 	 		if(toDoItem.left.equals("survive")) {
 		 		survive();
-	 		} else if(toDoItem.left.equals("level")) {
-	 			level();
 	 		} else if(toDoItem.left.equals("findFood")) {
 	 			findFood();
 	 		} else if(toDoItem.left.equals("findDrink")) {
@@ -91,15 +89,34 @@ public class Bisbat extends Thread {
 	 			explore();
 	 		} else if(toDoItem.left.equals("consider")) {
 	 			consider(toDoItem);
+	 		} else if(toDoItem.left.equals("getHere")) {
+	 			getHere((Item)toDoItem.right);
 	 		} else if(toDoItem.left.equals("sleep")) {
 				sleep((Integer)toDoItem.right);
+	 		} else if(toDoItem.left.equals("level")) {
+	 			level(toDoItem.right);
+	 		} else if(toDoItem.left.equals("kill")) {
+	 			kill(((Being)toDoItem.right));
 	 		} else if(toDoItem.left.equals("confirm")) {
 	 			confirm();	 			
+	 		} else {
+	 			debug("Didn't know what to do with: " + toDoItem.left);
 	 		}
 	 	}
-	 	connection.send("quit");
+	 	//connection.send("quit");
 	}
 	
+	private void kill(Being being) {
+		connection.send("say Hey " + being.shortDesc + ", I'm about to kill you!");
+		boredom = 0;
+		connection.send("kill " + being.name);
+	}
+
+	private void getHere(Item item) {
+		
+		
+	}
+
 	private void findDrink() {
 		updateCarrying();
 		
@@ -117,15 +134,45 @@ public class Bisbat extends Thread {
 	private void updateCarrying() {
 		connection.send("inventory");
 		String result = resultQueue.pop();
+		while(result != null) {
+			if(result.contains("Your Inventory:")) {
+				carrying = new Vector<Item>();
+				for(String line : result.split("\n")) {
+					for(Item i : knownItemList) {
+						if(i.getShort().equalsIgnoreCase(line)) {
+							carrying.add(i);
+						}
+					}
+				}
+				result = null;
+			} else {
+				// Not what we are waiting for, pop!;
+				result = resultQueue.pop();
+			}
+		}
 	}
 
 	/**
 	 * Bisbat will do this when the goal is to gain experience, 
 	 * with the ultimate goal of gaining in level.
+	 * @param object 
 	 *
 	 */
-	private void level() {
-		// TODO Auto-generated method stub
+	private void level(Object object) {
+		
+		int thresh = 2;
+		for(Being b : knownBeingList) {
+			if((b.strength + b.toughness) <= thresh) {
+				for(Room r : b.seenIn) {
+					debug("Walking to the location of " + b.shortDesc);
+					walkToRoomIfKnown(r);
+					if(b.seenIn.contains(currentRoom)) {
+						toDoList.add(new Pair<String,Object>("kill", b));
+						return;
+					}
+				}
+			}
+		}
 		
 	}
 
@@ -229,6 +276,8 @@ public class Bisbat extends Thread {
 			} else {
 				if(!b.isSureOfName()) {
 					toDoList.push(new Pair<String,Object>("consider", b));
+				} else {
+					addReciprocol(b, currentRoom);
 				}
 			}
 			
@@ -255,22 +304,27 @@ public class Bisbat extends Thread {
 	 * Instructs Bisbat to simply survive in the environment.
 	 */
 	public void survive() {
+		toDoList.push(new Pair<String,Object>("survive", null));
 		if(hungry) {
-			toDoList.push(new Pair<String,Object>("survive", null));
 			toDoList.push(new Pair<String,Object>("findFood", null));
 			return;
 		}
 		if(thirsty) {
-			toDoList.push(new Pair<String,Object>("survive", null));
 			toDoList.push(new Pair<String,Object>("findDrink", null));
 			return;
 		}
-		if(health != maxHealth || move != maxMove || mana != maxMana) {
-			debug("Sleeping to regain something. " + health + "/" + maxHealth + " " +
-					 								 mana + "/" + maxMana + " " +
-													 move + "/" + maxMove);
-			toDoList.push(new Pair<String,Object>("survive", null));
-			toDoList.push(new Pair<String,Object>("sleep", 30));
+		
+		if(health != maxHealth || mana != maxMana) {
+			heal();
+			return;
+		}
+		if(boredom > 0) {
+			toDoList.push(new Pair<String,Object>("level",null));
+			return;
+		}
+		if(move != maxMove) {
+			heal();
+			boredom++;
 			return;
 		}
 		print("Good job, we have done everything we can in this game.");
@@ -279,7 +333,15 @@ public class Bisbat extends Thread {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		toDoList.push(new Pair<String,Object>("survive", null));
+
+	}
+	
+	private void heal() {
+		debug("Sleeping to regain something. " + health + "/" + maxHealth + " " +
+				 mana + "/" + maxMana + " " +
+				 move + "/" + maxMove);
+		toDoList.push(new Pair<String,Object>("sleep", 30));
+		connection.send("save");
 	}
 	
 	/**
@@ -674,6 +736,7 @@ public class Bisbat extends Thread {
 	public void addKnowledgeOf(Item i) {
 		if(!knownItemList.contains(i)) {
 			knownItemList.add(i);
+			toDoList.push(new Pair<String,Object>("getHere", i));
 		}
 	}
 	
@@ -684,9 +747,20 @@ public class Bisbat extends Thread {
 		if(!knownBeingList.contains(b)) {
 			knownBeingList.add(b);
 			toDoList.push(new Pair<String,Object>("consider", b));
+		} else {
+			
+			addReciprocol(b, currentRoom);
 		}
 	}
 
+	private void addReciprocol(Being b, Room r) {
+		if(!b.seenIn.contains(r)) {
+			b.seenIn.add(r);
+		}
+		if(!r.beings.contains(b)) {
+			r.beings.add(b);
+		}
+	}
 	/**
 	 * Prints the time with given string
 	 * @param string: prints this string along with the current time
@@ -705,7 +779,7 @@ public class Bisbat extends Thread {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Bisbat alpha = new Bisbat("cisbat", "alpha");
+		Bisbat alpha = new Bisbat("Bisbat", "alpha");
 		alpha.start(); 
 	}
 	

@@ -35,8 +35,9 @@ public class SendCommands extends Thread {
 						handleUserCommand(command);
 						command = reader.readLine();
 					} catch(Exception e) {
-						e.printStackTrace();
-						continue;
+						// This happens only when we shut down the game.
+						//e.printStackTrace();
+						return;
 					}
 			}
 			

@@ -87,6 +87,7 @@ public class RecieveGameOutput extends Thread {
 					Being b = new Being(occupant.substring(2));
 					beings.add(b);
 					bisbat.addKnowledgeOf(b);
+					break;
 				} else if(occupant.startsWith("I:")) {
 					Item i = new Item(occupant.substring(2));
 					items.add(i);
@@ -111,8 +112,13 @@ public class RecieveGameOutput extends Thread {
 				bisbat.thirsty = true;
 			} else if(string.contains("Cisbat arrives from the")) {
 				bisbat.connection.send("say hi Cisbat!");
-			} else if(string.length() < 1) {
-				
+			} else if(string.contains("You are now standing.")) {
+			} else if(string.contains("You are now sleeping.")) {
+			} else if(string.contains("You save your progress.")) {	
+			} else if(string.contains("You can't do that while sleeping!")) { 
+				bisbat.connection.send("wake");
+				bisbat.connection.send("quit");
+			} else if(string.length() < 1) {				
 			} else {
 				System.out.println("'<--" + string + "'");
 				bisbat.resultQueue.add(string);

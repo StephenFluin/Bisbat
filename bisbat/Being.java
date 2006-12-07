@@ -13,8 +13,8 @@ public class Being {
 	 * Contains a list of total damages dealt by this mobile for 
 	 * each fight.
 	 */
-	public Vector<Integer> damageHistory;
-	public Vector<Room> seenIn;
+	public Vector<Integer> damageHistory = new Vector<Integer>();
+	public Vector<Room> seenIn = new Vector<Room>();
 	public int guessLocation = 0;
 	
 	/**
@@ -77,6 +77,11 @@ public class Being {
 			return names[guessLocation];
 		}
 	}
+	/**
+	 * Returns true if we guessed correctly, false if we didn't guess correctly.
+	 * @param result The result string of the consider command from the game.
+	 * @return True if our consider command guessed something, false otherwise.
+	 */
 	public boolean setGuessResult(String result) {
 		if(result.startsWith("You don't see that here.")) {
 			setGuessResult(false);
@@ -118,19 +123,21 @@ public class Being {
 			m3 = p3.matcher(result);
 			
 			if(m.matches()) {
-				Bisbat.debug("Really strong.");
 				strength = 3;
 			} else if (m2.matches()) {
-				Bisbat.debug("kinda strong.");
 				strength = 2;
 			} else if(m3.matches()) {
-				Bisbat.debug("kinda weak.");
 				strength = 1;
 			}
 			setGuessResult(true);
 			return true;
 		}
 	}
+	/**
+	 * Returns that we successfully guessed a name of a being, 
+	 * updating guessing mode.
+	 * @param success Whether or not we were sucessfull in our guess.
+	 */
 	public void setGuessResult(boolean success) {
 		if(success) {
 			if(guessMode == 0) {
