@@ -88,6 +88,9 @@ public class Bisbat extends Thread {
 	 		} else if(toDoItem.left.equals("findDrink")) {
 	 			findDrink();
 	 		} else if(toDoItem.left.equals("reference")) {
+	 				
+	 			//debug("about to return to reference... this should mean that we're done exploring");
+	 			
 	 			returnToUnique();
 	 		} else if(toDoItem.left.equals("firstRoom")) {
 	 			returnToReference();
@@ -104,7 +107,15 @@ public class Bisbat extends Thread {
 	 		} else if(toDoItem.left.equals("kill")) {
 	 			kill(((Being)toDoItem.right));
 	 		} else if(toDoItem.left.equals("confirm")) {
-	 			confirm();	 			
+	 			//referenceRoom.printCount();
+	 			//currentRoom.printCount();
+	 			//debug(" ~~~~~~~~~~~~~~~~~~~~~ just ENTERED confrim ~~~~~~~~~~~~~~~~~~~~~~");
+	 			confirm();	 	
+	 			
+	 			//debug(" ~~~~~~~~~~~~~~~~~~~~~ just EXITED confrim ~~~~~~~~~~~~~~~~~~~~~~");
+	 			//currentRoom.printTree();
+	 			//referenceRoom.printCount();
+	 			//currentRoom.printCount();
 	 		} else if(toDoItem.left.equals("levelUpActions")) {
 	 			levelUpActions();
 	 		} else if(toDoItem.left.equals("reconsider")) {
@@ -273,7 +284,7 @@ public class Bisbat extends Thread {
 			}
 		}
 		if(best == null) {
-			// SHould not happen, could happen if all beings did 0 damage.
+			// Should not happen, could happen if all beings did 0 damage.
 			Thread.dumpStack();
 		} else {
 			for(Room r : best.seenIn) {
@@ -474,13 +485,18 @@ public class Bisbat extends Thread {
 	 * confirm, this method will not add itself.
 	 */
 	public void confirm() {
-		//debug("Entered confirm() method");
+		
+		//currentRoom.print();
+		//debug("This room has been confirmed: " + currentRoom.confirmed);
+		//currentRoom.printTree();
 		//find the nearest unconfirmed room, and go there
-		if (!currentRoom.confirmed()) {
+		if (currentRoom.confirmed()) {
+			//debug("currentRoom was already confirmed");
 			ArrayList<Exit> path = RoomFinder.searchForPathToUnconfirmedRoom(currentRoom);
-			if (path == null) {
+			if (path == null || path.isEmpty()) {
 				//we didn't find an unconfirmed room in the knowledge base, we're done here
 				//debug("exiting confirm at exit 1");
+				debug("Couldn't find any unconfirmed rooms");
 				return;
 			}
 			for(Exit exit : path) {
@@ -488,44 +504,77 @@ public class Bisbat extends Thread {
 				if (interrupted) {
 					// we have been interrupted, try again.
 					toDoList.push(new Pair<String,Object>("confirm",null));
-					//debug("exiting confirm at exit 2");
+					debug("exiting confirm from being interrupted");
 					return;
 				} 
 			}
 		}
+		
+		//debug("Trying to Confirm this room 1:");
+		//currentRoom.printTree();
+		//currentRoom.printCount();
+		
+		//toDoList.push(new Pair<String,Object>("reference",null));
+		toDoList.push(new Pair<String,Object>("confirm",null));
+		
 		//we are now at the nearest unconfirmed room it is likely that we didn't move.
 		//store this room, it wil be usefull if we end up consolidating!
 		Room previous = currentRoom;		
+		
 		//find all the (confirmed) rooms that match this room in the knowledge base.
 		LinkedList<Room> matches = RoomFinder.searchForAllMatchingRooms(referenceRoom, currentRoom);
 		LinkedList<Room> temp = new LinkedList<Room>();
+		
+		//remove the currentRoom from matches.
+		matches.remove(currentRoom);
+		
 		for (Room room : matches) {
 			if (!room.confirmed()) {
 				temp.add(room);
 			}
 		}
 		//store these rooms, if we consolidate, one of these will be the one consolidated
-		LinkedList<Room> matched = new LinkedList<Room>();
-		for (Room room : matches) {
-			matched.add(room);
-		}
+		LinkedList<Room> matched = new LinkedList<Room>(matches);
 		//remove all unconfirmed rooms from matches
 		matches.removeAll(temp);
 		temp.clear();
+		
 		if (matches.isEmpty()){
 			//no confirmed rooms match this room. This is a new room, confirm.
-			currentRoom.confirm();
+			previous.confirm();
+			currentRoom = previous;
+
+			debug("Confirming a room based on zero matching rooms.");
 		} else {
 			/* There is at least one confirmed room that matches our current room.
 			 * Since all of these rooms have been confirmed, there must be a known path,
 			 * i.e. a path of confirmed exits, that distinguished them from eachother.
 			 * if we follow this path, we will be able to determine which, if any of those
 			 * rooms, our currentRoom matches. */
+			
 			LinkedList<String> dirPath = RoomFinder.commonConfirmedPath(matches);
+			LinkedList<String> followedPath = new LinkedList<String>();
+			
+			int counter = 0; // how many of these have we taken?
+			int countDown = 4; // travel only 4 exits after reducing to only one matching room.
+			
+			//disconnect any previous attachment to the rest of the knowledge base
+			String connectingDirection = null;
+			Room connectingRoom = null;
+			for(Exit e : currentRoom.exits) {
+				if (e.nextRoom != null) {
+					connectingDirection = e.getDirection();
+					connectingRoom = e.nextRoom;
+					e.nextRoom = null;
+				}
+			}
 			
 			//debug("The current Room!");
 			//debug("dirPath has size: " + dirPath.size());
 			for(String dir : dirPath) {
+				if (countDown == 0) {
+					break;
+				}
 				for (Room room : matches) {
 					if (room != null && room.getExit(dir) != null) {
 						temp.add(room.getExit(dir).nextRoom);
@@ -536,7 +585,13 @@ public class Bisbat extends Thread {
 				temp.clear();
 				//follow our direction, see what we get
 				//debug("Is this the follow command that yields the trying to follow(null) message");
-				follow(currentRoom.getExit(dir), false);			
+				follow(currentRoom.getExit(dir), false);
+				
+				followedPath.addLast(dir); //path we are following.
+				counter++;
+				if (matches.size() <= 1) {
+					countDown--;
+				}
 				if (currentRoom == null) {
 					debug("Well... our currentRoom is null... ?");
 				}
@@ -556,15 +611,36 @@ public class Bisbat extends Thread {
 			if (matches.isEmpty()){
 				//previous is a unique room, confirm it's existence
 				//debug("we have determined that this is a unique room!");
+				//debug("Confirming a room based on zero matching rooms after path exploration.");
+				
+				/* In this case, we have followed what we knew was a connected path and ended up
+				 * someplace other than we hypothesized we would. This means that not only was the 
+				 * hypothetical room unique, but so were the rooms along the path. (This is not
+				 * always true, but will be used as an assumption.)
+				 */
+				
+				//reconnect new rooms to the knowledge base
+				if (connectingDirection != null){
+					previous.getExit(connectingDirection).nextRoom =  connectingRoom;
+				}
+				
+				for(String dir : followedPath) {
+					previous.confirm();
+					if (previous.getExit(dir) != null) {
+						previous = previous.getExit(dir).nextRoom;
+					}
+				}
 				previous.confirm();
+				currentRoom = previous;
+				currentRoom.printTree();
+				
 			} else if (matches.size() == 1) {
 				//debug("Trying to consolidate two rooms:");
-				//previous is (to a depth of 4) the same as the one element in matches
+				//previous is (to a depth of 10) the same as the one element in matches
 				//which original room went to this room.
 				Room toConsolidate = null;
 				for(Room room : matched) {
-					Room next = room.roomAfterPath(dirPath);
-					if (currentRoom.matchesRoom(next)) {
+					if (currentRoom.matchesRoom(room.roomAfterPath(followedPath))) {
 						toConsolidate = room;
 						break;
 					}
@@ -572,15 +648,47 @@ public class Bisbat extends Thread {
 				//debug("attempting to consolidate");	
 				if (toConsolidate != null){
 					//consolidate rooms.
-					toConsolidate.update(previous);
-					toConsolidate.getExit(dirPath.getFirst()).nextRoom = previous.getExit(dirPath.getFirst()).nextRoom;
+					
+					/*
+					debug("Printing the tree from current (disconnected location)");
+					currentRoom.printTree();
+					debug("Printing the tree from previous (disconnected location)");
+					previous.printTree();
+					debug("Printing the tree from toConsolidate (disconnected location)");
+					toConsolidate.printTree();
+					*/
+					
+					ArrayList<Exit> exits = RoomFinder.searchForPathBetweenRooms(toConsolidate, previous);
+					LinkedList<String> path = new LinkedList<String>();
+					for(Exit e : exits) {
+						path.addLast(e.getDirection());
+					}
+					String last = path.removeLast();
+				    Room before = toConsolidate.roomAfterPath(path);
+				    before.getExit(last).nextRoom = toConsolidate;
+					
+					//previous = toConsolidate;
+					currentRoom = toConsolidate.roomAfterPath(followedPath);
+					
+					
+					//debug("Finished Consolidation");
+					
 					//debug("Finished Consolidation");
 				} else {
 					debug("Something went wrong while consolidating inside confirm()");
+					debug("Size of list of matching rooms: " + matches.size());
+					previous.print();
+					currentRoom.print();
+					matches.getFirst().print();
+					debug("__________________________________________________");
+					for(Room room : matched) {
+						room.print();
+					}
 				}
 			} else {
 				//something went wrong, coudn't distinguish by distinguishing path
-				debug("Couldn't confirm a room with a distinguishing path of length 4");
+				debug("Couldn't confirm a room with a distinguishing path of length 10");
+				previous.print();
 			}
 			//debug("exiting confirm at exit 3");
 			
@@ -712,7 +820,7 @@ public class Bisbat extends Thread {
 				} else {
 					continue;
 				}
-				if(rooms == null || rooms.isEmpty() || rooms.size() == 1) {
+				if(rooms.size() == 1 && rooms.getFirst().confirmed()) {
 					path = RoomFinder.searchForPathBetweenRooms(currentRoom, temp);
 					break;
 				} else {
@@ -772,11 +880,15 @@ public class Bisbat extends Thread {
 			//Bisbat.debug("we are trying to follow(null) and it isn't working");
 			return false; 
 		}
+		
 		chosenExit.confirm();
 		Room previousRoom = currentRoom; //store the previous room
 		if(chosenExit.getDoorCommand() != null) {
 			connection.send(chosenExit.getDoorCommand()); //open a door if it's there
 		}
+		
+		debug("--> " + chosenExit.direction);
+		
 		connection.sendNavigation(chosenExit.direction);
 		Room result = roomFindingThread.pop();
 		if(result != null) {
@@ -792,19 +904,27 @@ public class Bisbat extends Thread {
 			//currentRoom.printTree();
 			if (chosenExit.nextRoom != null && chosenExit.nextRoom.matchesRoom(currentRoom)){
 				//path went where it was expected to go.
+				//chosenExit.nextRoom.update(currentRoom);
 				chosenExit.nextRoom.update(currentRoom);
 				currentRoom = chosenExit.nextRoom;
+				//possibility of bidriectional exit?
+				if(currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())) != null) {
+					//there is the possibilty of a bidirectional exit (assume that it is one)
+					currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())).nextRoom = previousRoom;
+				}
 				return true;
-			} else if(currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())) != null) {
-				//there is the possibilty of a bidirectional exit (assume that it is one)
-				currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())).nextRoom = previousRoom;
 			} else {
-				debug("did not find a bidirectional exit in a non-exploring situation");
+				chosenExit.nextRoom = currentRoom;
+				//possibility of bidriectional exit?
+				if(currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())) != null) {
+					//there is the possibilty of a bidirectional exit (assume that it is one)
+					currentRoom.getExit(Exit.getOpposite(chosenExit.getDirection())).nextRoom = previousRoom;
+				}
+				return false;
 			}
-			chosenExit.nextRoom = currentRoom;
-			return true;
-		} else if (chosenExit.nextRoom != null && chosenExit.nextRoom.matchesRoom(currentRoom)) {
+		} else if (chosenExit.nextRoom != null && chosenExit.confirmed && chosenExit.nextRoom.matchesRoom(currentRoom)) {
 			//path went where it was expected to go.
+			//chosenExit.nextRoom.update(currentRoom);
 			chosenExit.nextRoom.update(currentRoom);
 			currentRoom = chosenExit.nextRoom;
 			return true;
@@ -909,7 +1029,7 @@ public class Bisbat extends Thread {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Bisbat alpha = new Bisbat("Bisbat", "alpha");
+		Bisbat alpha = new Bisbat("cisbat", "alpha");
 		alpha.start(); 
 	}
 	

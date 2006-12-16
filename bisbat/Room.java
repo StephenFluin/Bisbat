@@ -109,6 +109,7 @@ public class Room {
 		for(Being b : beings) {
 			result += b.shortDesc + "\t";
 		}
+		result += "\nConfirmed: " + confirmed;
 		return result;
 	}
 	
@@ -179,8 +180,9 @@ public class Room {
 		System.out.println("Total rooms:" + counter); // debugger
 	}
 	
+	
 	/**
-	 * Prints the number of rooms in the knowledge base
+	 * Prints the number of rooms from this room
 	 */
 	void printCount(){
 		int counter = 0;
@@ -234,10 +236,7 @@ public class Room {
 		if (next == null) {
 			return null;
 		} else {
-			LinkedList<String> nextPath = new LinkedList<String>();
-			for(String s : path) {
-				nextPath.addLast(s);
-			}
+			LinkedList<String> nextPath = new LinkedList<String>(path);
 			nextPath.removeFirst();
 			return next.roomAfterPath(nextPath);
 		}

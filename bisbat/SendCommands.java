@@ -81,7 +81,6 @@ public class SendCommands extends Thread {
 			bisbat.referenceRoom.printCount();
 			System.out.println("Rooms known from the CURRENT room:");
 			bisbat.currentRoom.printCount();
-			
 		} else {
 			out.println(command);
 		}

@@ -63,6 +63,7 @@ public class RoomFinder extends Thread {
 				/*
 				 * 140 is the average time for a room (lag), we check every 70 then.
 				 */
+				
 				Thread.sleep(70); // Optimize with semaphores? !TODO
 				count++;
 			} catch(InterruptedException e) {
@@ -144,6 +145,7 @@ public class RoomFinder extends Thread {
 		//Bisbat.print("Didn't find a room that matched."); // debugger
 		return null;
 	}
+	
 	
 	/**
 	 * Finds every room in the knowledge base that matches this given room
@@ -287,23 +289,23 @@ public class RoomFinder extends Thread {
 	}
 	
 	/**
-	 * Recusively finds the longest confirmed path (or a path of length 4) that 'rooms' share.
+	 * Recusively finds the longest confirmed path (or a path of length 10) that 'rooms' share.
 	 * @param rooms: rooms that we want to find a confirmed path from.
-	 * @return: longest confirmed path (or path of length 4) from 'rooms'.
+	 * @return: longest confirmed path (or path of length 10) from 'rooms'.
 	 */
 	static public LinkedList<String> commonConfirmedPath (LinkedList<Room> rooms){
 		return commonConfirmedPath(rooms, 0, new LinkedList<String>());
 	}
 	
 	/**
-	 * Recusively finds the longest confirmed path (or a path of length 4) that 'rooms' share.
+	 * Recusively finds the longest confirmed path (or a path of length 10) that 'rooms' share.
 	 * @param rooms: rooms that we want to find a confirmed path from.
 	 * @param depth: how far resursively we have traveled
 	 * @param path: path to this point
-	 * @return: longest confirmed path (or path of length 4) from 'rooms'.
+	 * @return: longest confirmed path (or path of length 10) from 'rooms'.
 	 */
 	static private LinkedList<String> commonConfirmedPath(LinkedList<Room> rooms, int depth, LinkedList<String> path){
-		if (depth >= 4) {
+		if (depth >= 10) {
 			return path;
 		}
 		LinkedList<String> commonDirections = commonConfirmedDirection(rooms);
@@ -343,7 +345,7 @@ public class RoomFinder extends Thread {
 				}
 			}
 		}
-		//Bisbat.debug("Longest confirming path <= 4 is this long: " + longest.size());\
+		//Bisbat.debug("Longest confirming path <= 10 is this long: " + longest.size());\
 		if (longest.isEmpty()) {
 			Bisbat.debug("Turns out that these rooms have no Common Confirmed Path.");
 		}
