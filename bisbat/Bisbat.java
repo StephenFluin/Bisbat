@@ -274,6 +274,11 @@ public class Bisbat extends Thread {
 				
 		}
 		debug("We have fought everyone within the threshold at least once.");
+		try{
+			Thread.sleep(20000);
+		}catch(Exception e) {
+			
+		}
 		double maxExpPerDamage = 0;
 		Being best = null;
 		for(Being b : knownBeingList) {
@@ -284,8 +289,15 @@ public class Bisbat extends Thread {
 			}
 		}
 		if(best == null) {
-			// Should not happen, could happen if all beings did 0 damage.
+			// Should not happen, could happen if all beings did 0 damage. 
+			//Or if there are no beings, 
+			//or if we have never fought anyone.
 			Thread.dumpStack();
+			try{
+				Thread.sleep(2000);
+			} catch(Exception e) {
+				
+			}
 		} else {
 			for(Room r : best.seenIn) {
 				debug("Walking to the location of " + best.shortDesc + " to kill them, because they give the best exp.");
@@ -496,7 +508,7 @@ public class Bisbat extends Thread {
 			if (path == null || path.isEmpty()) {
 				//we didn't find an unconfirmed room in the knowledge base, we're done here
 				//debug("exiting confirm at exit 1");
-				debug("Couldn't find any unconfirmed rooms");
+				//debug("Couldn't find any unconfirmed rooms");
 				return;
 			}
 			for(Exit exit : path) {
@@ -613,9 +625,10 @@ public class Bisbat extends Thread {
 				//debug("we have determined that this is a unique room!");
 				//debug("Confirming a room based on zero matching rooms after path exploration.");
 				
-				/* In this case, we have followed what we knew was a connected path and ended up
-				 * someplace other than we hypothesized we would. This means that not only was the 
-				 * hypothetical room unique, but so were the rooms along the path. (This is not
+				/* In this case, we have followed what we knew was a connected 
+				 * path and ended up someplace other than we hypothesized we 
+				 * would. This means that not only was the hypothetical room 
+				 * unique, but so were the rooms along the path. (This is not
 				 * always true, but will be used as an assumption.)
 				 */
 				
@@ -625,14 +638,22 @@ public class Bisbat extends Thread {
 				}
 				
 				for(String dir : followedPath) {
+					
 					previous.confirm();
-					if (previous.getExit(dir) != null) {
+					if (previous.getExit(dir) != null && previous.getExit(dir).nextRoom != null) {
 						previous = previous.getExit(dir).nextRoom;
 					}
+					
+					//debug("Out of the loop.");
 				}
-				previous.confirm();
-				currentRoom = previous;
-				currentRoom.printTree();
+				if (previous != null) {
+					previous.confirm();
+					currentRoom = previous;
+				} else {
+					debug("Previous was null, FIX THIS!");
+				}
+				
+				//currentRoom.printTree();
 				
 			} else if (matches.size() == 1) {
 				//debug("Trying to consolidate two rooms:");
@@ -672,9 +693,9 @@ public class Bisbat extends Thread {
 					
 					
 					//debug("Finished Consolidation");
-					
-					//debug("Finished Consolidation");
 				} else {
+					// If anything goes wrong here, we need to know it.
+					// This should not happen ever. - Brian (And it was happening a lot)
 					debug("Something went wrong while consolidating inside confirm()");
 					debug("Size of list of matching rooms: " + matches.size());
 					previous.print();
@@ -771,7 +792,7 @@ public class Bisbat extends Thread {
 		ArrayList<Exit> path = null;
 		try {
 			path = RoomFinder.searchForPathBetweenRooms(currentRoom, walkMeToHere);
-			debug("Path is " + path.size() + " long.");
+			//debug("Path is " + path.size() + " long.");
 		} catch(OutOfMemoryError e) {
 			System.out.println("Path betwen rooms -> out of memory!");
 		}
@@ -887,7 +908,7 @@ public class Bisbat extends Thread {
 			connection.send(chosenExit.getDoorCommand()); //open a door if it's there
 		}
 		
-		debug("--> " + chosenExit.direction);
+		//debug("--> " + chosenExit.direction);
 		
 		connection.sendNavigation(chosenExit.direction);
 		Room result = roomFindingThread.pop();
@@ -990,16 +1011,16 @@ public class Bisbat extends Thread {
 		}
 	}
 	
-	public void addKnowledgeOf(Being b) {
+	public Being addKnowledgeOf(Being b) {
 		if(b == null) {
 			debug("You are trying to add knowledge of a null, this is a problem.");
 		}
 		if(!knownBeingList.contains(b)) {
 			knownBeingList.add(b);
 			toDoList.push(new Pair<String,Object>("consider", b));
+			return b;
 		} else {
-			
-			//addReciprocol(b, currentRoom);
+			return knownBeingList.get(knownBeingList.indexOf(b));
 		}
 	}
 

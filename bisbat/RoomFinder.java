@@ -64,7 +64,7 @@ public class RoomFinder extends Thread {
 				 * 140 is the average time for a room (lag), we check every 70 then.
 				 */
 				
-				Thread.sleep(70); // Optimize with semaphores? !TODO
+				Thread.sleep(10); // Optimize with semaphores? !TODO
 				count++;
 			} catch(InterruptedException e) {
 				Bisbat.debug("InterruptedException: ... not sure what's causing this one!");
@@ -89,7 +89,11 @@ public class RoomFinder extends Thread {
 				//System.out.println("We didn't find a room that matched: " + foundRooms.getFirst().title); // debugger
 			}
 		}
-		return popFirstRoom(); // get first does not "pop" the list
+		Room tmp = popFirstRoom(); // get first does not "pop" the list
+		if(tmp == null) {
+			throw(new NullPointerException());
+		}
+		return tmp;
 	}
 	
 	/**

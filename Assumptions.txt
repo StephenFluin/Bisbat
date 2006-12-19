@@ -13,6 +13,7 @@ Current assumptions that Bisbat makes:
 10. Game environment is constant. Places/Exits do not disappear/appear
 11. Mobiles with the same long description are the same.
 12. Items with the same long description are the same.
+13. Mobiles exist in the game.
 
 
 What can Bisbat currently do:

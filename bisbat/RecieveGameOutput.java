@@ -85,9 +85,13 @@ public class RecieveGameOutput extends Thread {
 			for(String occupant : roomOccupants) {
 				if(occupant.startsWith("M:")) {
 					Being b = new Being(occupant.substring(2));
-					beings.add(b);
-					bisbat.addKnowledgeOf(b);
-					break;
+					if(!bisbat.knownBeingList.contains(b)) {
+						b = bisbat.addKnowledgeOf(b);
+						beings.add(b);
+						
+					} else {
+						
+					}
 				} else if(occupant.startsWith("I:")) {
 					Item i = new Item(occupant.substring(2));
 					items.add(i);
@@ -97,6 +101,12 @@ public class RecieveGameOutput extends Thread {
 
 			Room recentlyDiscoveredRoom = new Room(title, description, exits, beings, items);
 			bisbat.foundRoom(recentlyDiscoveredRoom);
+			
+			for(Being b: beings) {
+				if(!b.seenIn.contains(recentlyDiscoveredRoom)) {
+					b.seenIn.add(recentlyDiscoveredRoom);
+				}
+			}
 			
 		} else {
 			//System.out.println("~~~~~ Not a Room! ~~~~~"); // debugger
