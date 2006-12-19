@@ -275,7 +275,7 @@ public class Bisbat extends Thread {
 		}
 		debug("We have fought everyone within the threshold at least once.");
 		try{
-			Thread.sleep(20000);
+			Thread.sleep(200);
 		}catch(Exception e) {
 			
 		}
@@ -502,6 +502,11 @@ public class Bisbat extends Thread {
 		//debug("This room has been confirmed: " + currentRoom.confirmed);
 		//currentRoom.printTree();
 		//find the nearest unconfirmed room, and go there
+		if (currentRoom == null) {
+			debug("currentRoom got set to null... trying to fix it");
+			connection.send("look");
+			currentRoom = roomFindingThread.pop();
+		}
 		if (currentRoom.confirmed()) {
 			//debug("currentRoom was already confirmed");
 			ArrayList<Exit> path = RoomFinder.searchForPathToUnconfirmedRoom(currentRoom);
@@ -648,10 +653,10 @@ public class Bisbat extends Thread {
 				}
 				if (previous != null) {
 					previous.confirm();
-					currentRoom = previous;
 				} else {
 					debug("Previous was null, FIX THIS!");
 				}
+				currentRoom.confirm();
 				
 				//currentRoom.printTree();
 				
@@ -679,19 +684,52 @@ public class Bisbat extends Thread {
 					toConsolidate.printTree();
 					*/
 					
+					//reconnect new rooms to the knowledge base
+					if (connectingDirection != null){
+						previous.getExit(connectingDirection).nextRoom =  connectingRoom;
+					}
+					
 					ArrayList<Exit> exits = RoomFinder.searchForPathBetweenRooms(toConsolidate, previous);
 					LinkedList<String> path = new LinkedList<String>();
-					for(Exit e : exits) {
-						path.addLast(e.getDirection());
+					
+				
+					if (exits == null && currentRoom.matchesRoom(toConsolidate.roomAfterPath(followedPath))) {
+					
+						debug("This seems to be happening when toConsolidate.roomAfterPath(followedPath) = previous");
+						//actually happening at other tiems too.
+						currentRoom = toConsolidate;
+						//does just setting the currentRoom in this case solve everything?
+					
+						/*
+						toConsolidate.printTree();
+						toConsolidate.roomAfterPath(followedPath).print();
+						currentRoom.print();
+						previous.print();
+						toConsolidate.print();
+						*/
+						
+						previous = toConsolidate;
+						ArrayList<Exit> p = RoomFinder.searchForPathBetweenRooms(toConsolidate, currentRoom);
+						LinkedList<String> f = new LinkedList<String>();
+						for(Exit e : p) {
+							f.addLast(e.direction);
+						}
+						currentRoom = toConsolidate.roomAfterPath(f);
+						
+					} else {
+						for(Exit e : exits) {
+							path.addLast(e.getDirection());
+						}
+						String last = path.removeLast();
+					    Room before = toConsolidate.roomAfterPath(path);
+					    before.getExit(last).nextRoom = toConsolidate;
+						
+						//previous = toConsolidate;
+						currentRoom = toConsolidate.roomAfterPath(followedPath);
+						
+						
 					}
-					String last = path.removeLast();
-				    Room before = toConsolidate.roomAfterPath(path);
-				    before.getExit(last).nextRoom = toConsolidate;
-					
-					//previous = toConsolidate;
-					currentRoom = toConsolidate.roomAfterPath(followedPath);
-					
-					
+				
 					//debug("Finished Consolidation");
 				} else {
 					// If anything goes wrong here, we need to know it.
@@ -708,7 +746,11 @@ public class Bisbat extends Thread {
 				}
 			} else {
 				//something went wrong, coudn't distinguish by distinguishing path
-				debug("Couldn't confirm a room with a distinguishing path of length 10");
+				debug("Couldn't confirm a room with a distinguishing path of length 10: matches = " + matches.size());
+				for(String s : followedPath) {
+					System.out.print(s + " ");
+				}
+				returnToReference();
 				previous.print();
 			}
 			//debug("exiting confirm at exit 3");
