@@ -1,0 +1,1024 @@
+TITLE:Forest
+DESCRIPTION:
+Deep in the forest there are webs all over.  In the darkness caused by the 
+thick canopy of trees shapes seem to be slowly moving.
+
+east	north	south	
+Beings:null	
+Confirmed: false
+
+(Mon Dec 18 20:09:47 CST 2006) Starting objectives
+--> north
+--> east
+--> south
+--> east
+--> east
+--> east
+--> north
+--> west
+--> south
+Out of the loop.
+--> east
+--> west
+--> west
+--> west
+--> east
+--> east
+--> east
+--> west
+--> west
+--> north
+--> south
+--> east
+Out of the loop.
+Out of the loop.
+--> east
+--> north
+--> west
+--> west
+--> west
+--> east
+--> east
+--> east
+--> south
+--> west
+--> west
+--> west
+--> west
+--> south
+--> southeast
+--> west
+--> north
+--> west
+--> north
+Out of the loop.
+--> north
+<--'A wolf arrives from the south.'
+--> west
+--> west
+--> south
+--> south
+--> south
+--> east
+--> north
+--> west
+--> north
+Out of the loop.
+Out of the loop.
+Out of the loop.
+--> east
+--> north
+--> west
+Out of the loop.
+Out of the loop.
+--> south
+--> east
+--> east
+--> east
+--> west
+--> north
+Out of the loop.
+Out of the loop.
+--> east
+--> south
+--> south
+--> west
+--> west
+--> north
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+--> east
+--> north
+--> west
+--> north
+--> north
+--> east
+--> east
+--> east
+--> south
+--> west
+--> west
+--> west
+--> south
+--> east
+--> east
+--> south
+--> west
+--> south
+--> west
+--> north
+--> north
+--> east
+--> east
+--> south
+--> south
+--> west
+Out of the loop.
+--> west
+--> east
+--> north
+--> east
+--> east
+--> south
+--> west
+--> east
+--> north
+--> east
+--> east
+--> south
+--> south
+--> south
+--> west
+--> west
+--> south
+--> west
+--> west
+--> up
+--> east
+--> west
+--> north
+--> south
+--> south
+--> north
+--> west
+--> east
+--> down
+--> north
+--> south
+--> east
+--> east
+--> east
+--> east
+--> up
+--> west
+--> east
+--> north
+--> south
+Out of the loop.
+--> south
+--> north
+Out of the loop.
+--> east
+--> west
+Out of the loop.
+--> down
+--> north
+--> south
+--> west
+--> west
+--> up
+--> up
+--> west
+--> east
+--> east
+--> west
+--> up
+--> up
+--> down
+--> down
+--> down
+--> east
+--> west
+--> west
+--> west
+--> east
+--> east
+--> down
+--> north
+--> north
+co--> east
+u--> north
+nt
+--> west
+Rooms known from the reference room:
+Total rooms:73
+Rooms known from the CURRENT room:
+Total rooms:73
+--> west
+--> south
+--> east
+--> north
+--> east
+--> south
+--> west
+--> south
+--> west
+--> east
+--> east
+--> east
+--> north
+--> north
+--> north
+--> north
+--> east
+--> east
+--> southeast
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+--> northwest
+--> west
+--> north
+--> north
+--> north
+--> northeast
+--> north
+--> northwest
+--> south
+--> south
+--> west
+--> southeast
+--> northeast
+--> west
+--> south
+--> north
+--> north
+--> north
+--> west
+--> southwest
+--> south
+--> southeast
+--> east
+--> west
+--> northwest
+--> north
+--> northeast
+--> east
+--> southeast
+--> north
+--> south
+--> south
+--> southwest
+--> south
+--> south
+--> south
+--> west
+--> west
+--> west
+--> south
+--> south
+--> north
+--> west
+--> south
+--> north
+--> west
+--> west
+--> south
+--> north
+--> west
+--> west
+--> up
+--> east
+--> west
+--> west
+--> east
+--> down
+--> west
+--> north
+--> west
+--> south
+--> east
+--> west
+--> west
+--> north
+--> east
+--> east
+--> north
+--> south
+--> west
+--> west
+--> south
+--> east
+--> east
+--> east
+--> east
+--> east
+--> east
+--> north
+--> east
+--> east
+--> west
+--> west
+--> south
+--> east
+--> east
+--> east
+--> east
+--> west
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+--> southwest
+--> northeast
+--> southeast
+--> northwest
+--> south
+--> north
+--> north
+--> north
+--> north
+--> east
+--> east
+--> north
+--> west
+--> west
+--> north
+--> north
+--> north
+--> west
+--> west
+--> south
+--> west
+--> west
+--> east
+--> east
+--> south
+--> east
+--> west
+--> north
+--> north
+--> east
+--> north
+--> west
+--> west
+--> west
+--> west
+--> west
+--> west
+Out of the loop.
+Out of the loop.
+--> east
+--> east
+--> north
+--> east
+--> east
+--> south
+--> north
+--> east
+--> east
+--> south
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> south
+--> north
+--> south
+--> north
+--> east
+--> east
+--> northwest
+--> northwest
+--> east
+--> southeast
+--> down
+--> up
+--> southeast
+--> south
+--> northwest
+--> northwest
+--> east
+--> southeast
+--> northwest
+--> west
+--> west
+--> west
+--> south
+--> east
+--> east
+--> south
+--> north
+--> east
+--> east
+--> north
+--> south
+--> south
+--> west
+--> west
+--> east
+--> east
+--> north
+--> northwest
+--> northwest
+--> west
+--> west
+--> east
+--> east
+--> east
+--> southeast
+--> southeast
+--> south
+--> west
+--> west
+--> west
+--> west
+--> north
+--> south
+--> east
+--> west
+--> east
+--> east
+--> east
+--> east
+--> north
+--> northwest
+--> northwest
+--> west
+--> west
+--> west
+--> south
+--> south
+--> east
+--> east
+--> east
+--> east
+--> south
+--> east
+--> south
+--> south
+--> east
+--> west
+--> south
+--> east
+--> east
+--> east
+--> east
+--> south
+--> west
+--> northwest
+--> north
+--> east
+--> east
+--> north
+--> east
+--> east
+--> south
+--> west
+--> west
+--> west
+--> east
+--> east
+--> north
+--> east
+--> south
+--> west
+--> west
+--> west
+--> east
+--> north
+--> west
+--> west
+--> south
+--> south
+--> southeast
+--> west
+--> west
+--> west
+--> west
+--> north
+--> north
+--> east
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> east
+--> east
+--> east
+--> south
+--> west
+--> west
+--> west
+--> north
+--> north
+--> north
+--> east
+--> south
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+(Mon Dec 18 20:11:38 CST 2006) We have finished mapping the known universe.
+--> east
+--> east
+--> east
+--> south
+--> west
+--> west
+--> west
+We have seen the spider[TITLE:Forest
+DESCRIPTION:
+Deep in the forest there are webs all over.  In the darkness caused by the 
+thick canopy of trees shapes seem to be slowly moving.
+
+east	north	south	
+Beings:null	
+Confirmed: true]
+Walking to the location of the spider
+--> east
+--> east
+--> east
+--> north
+--> east
+--> northwest
+--> north
+Killing------------
+<--'You say, "Hey the spider, I'm about to kill you!".'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [6 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+We won the fight!
+-----------Done Killing
+We have seen the naga[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+west	north	south	
+Beings:null	
+Confirmed: true]
+Walking to the location of the naga
+--> south
+--> southeast
+--> west
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+We have seen a wolf[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+east	west	north	south	
+Beings:null	null	null	
+Confirmed: true]
+Walking to the location of a wolf
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+Killing------------
+<--'You say, "Hey a wolf, I'm about to kill you!".'
+<--'A wolf arrives from the north.'
+We won the fight!
+-----------Done Killing
+Sleeping to regain something. 43/50 40/40 7970591/8000000
+Sleeping to regain something. 43/50 40/40 7970591/8000000
+<--'A wolf leaves to the north'
+We have seen the naga[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+west	north	south	
+Beings:
+Confirmed: true]
+Walking to the location of the naga
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> east
+--> west
+--> south
+--> east
+--> east
+--> east
+We have fought everyone within the threshold at least once.
+moblist
+(Mon Dec 18 20:12:43 CST 2006) the spider (S:1,F:1,AD:3.0,AE:490.0)
+(Mon Dec 18 20:12:43 CST 2006) PeEll (S:3)
+(Mon Dec 18 20:12:43 CST 2006) the naga (S:1)
+(Mon Dec 18 20:12:43 CST 2006) a wolf (S:1,F:1,AD:6.0,AE:148.0)
+(Mon Dec 18 20:12:43 CST 2006) the advanced student (S:3)
+(Mon Dec 18 20:12:43 CST 2006) a new student (S:2)
+(Mon Dec 18 20:12:43 CST 2006) the professor (S:3)
+(Mon Dec 18 20:12:43 CST 2006) Lupin (S:3)
+(Mon Dec 18 20:12:43 CST 2006) a troll (S:3)
+(Mon Dec 18 20:12:43 CST 2006) the candlestick maker (S:3)
+(Mon Dec 18 20:12:43 CST 2006) the baker (S:3)
+(Mon Dec 18 20:12:43 CST 2006) the guard (S:3)
+(Mon Dec 18 20:12:43 CST 2006) the troll (S:3)
+(Mon Dec 18 20:12:43 CST 2006) the kitchen hand (S:3)
+(Mon Dec 18 20:12:43 CST 2006) tim (S:3)
+(Mon Dec 18 20:12:43 CST 2006) a troll (S:3)
+Walking to the location of the spider to kill them, because they give the best exp.
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+--> east
+--> east
+--> east
+--> east
+--> northwest
+--> north
+We have seen the naga[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+west	north	south	
+Beings:
+Confirmed: true]
+Walking to the location of the naga
+--> south
+--> southeast
+--> west
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+We have fought everyone within the threshold at least once.
+Walking to the location of the spider to kill them, because they give the best exp.
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+--> east
+--> east
+--> east
+--> east
+--> northwest
+--> north
+We have seen the naga[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+west	north	south	
+Beings:
+Confirmed: true]
+Walking to the location of the naga
+--> south
+--> southeast
+--> west
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+We have fought everyone within the threshold at least once.
+<--'PeEll arrives in a whirl of smoke.'
+<--'PeEll starts following you.'
+Walking to the location of the spider to kill them, because they give the best exp.
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+--> east
+--> east
+--> east
+--> east
+--> northwest
+--> north
+Killing------------
+<--'You say, "Hey the spider, I'm about to kill you!".'
+<--'Your attack scratches the spider. [2 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [2 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack hits the spider. [6 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack hits the spider. [6 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'The spider arrives from the east.'
+<--'Your attack hits the spider. [6 damage]'
+We won the fight!
+-----------Done Killing
+Sleeping to regain something. 39/50 40/40 7970571/8000000
+Sleeping to regain something. 39/50 40/40 7970571/8000000
+Sleeping to regain something. 43/50 40/40 7970587/8000000
+We have seen the naga[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+west	north	south	
+Beings:
+Confirmed: true]
+Walking to the location of the naga
+--> south
+--> southeast
+--> west
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+We have fought everyone within the threshold at least once.
+Walking to the location of the spider to kill them, because they give the best exp.
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+--> east
+--> east
+--> east
+--> east
+--> northwest
+--> north
+Killing------------
+<--'You say, "Hey the spider, I'm about to kill you!".'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'The spider leaves to the north'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [5 damage]'
+We won the fight!
+-----------Done Killing
+Sleeping to regain something. 42/50 40/40 7970605/8000000
+Sleeping to regain something. 42/50 40/40 7970605/8000000
+We have seen the naga[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+west	north	south	
+Beings:
+Confirmed: true]
+Walking to the location of the naga
+--> south
+--> southeast
+--> west
+--> west
+--> west
+--> west
+<--'A wolf arrives from the south.'
+--> north
+--> east
+--> east
+--> east
+We have fought everyone within the threshold at least once.
+Walking to the location of the spider to kill them, because they give the best exp.
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+--> east
+--> east
+--> east
+--> east
+--> northwest
+--> north
+Killing------------
+<--'You say, "Hey the spider, I'm about to kill you!".'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [2 damage]'
+<--'Your attack scratches the spider. [3 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack scratches the spider. [2 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack hits the spider. [5 damage]'
+<--'Your attack scratches the spider. [4 damage]'
+<--'Your attack hits the spider. [6 damage]'
+<--'Your attack hits the spider. [6 damage]'
+We won the fight!
+-----------Done Killing
+Sleeping to regain something. 41/50 40/40 7970627/8000000
+Sleeping to regain something. 41/50 40/40 7970627/8000000
+We have seen the naga[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+west	north	south	
+Beings:
+Confirmed: true]
+Walking to the location of the naga
+--> south
+--> southeast
+--> west
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+We have fought everyone within the threshold at least once.
+<--'cisbat's Information
+Name:		cisbat
+Class:		Thief
+Time Played:	6 hours
+Hit Points:	50/50
+Mana Points:	40/40
+Move Points:	7970653/8000000
+Level:	1	Gold:	0
+Carrying:	15 (Max: 270)
+Strength:	18	Constitution:	11
+Charisma:	13	Dexterity:	8
+Intelligence:	8	Wisdom:	11
+Damage Dice:	2d3	Hit Dice:	2d3,2
+Hit Level (Minimum roll to hit):	5
+Experience:	5118	Favor:	0
+Can teach? ( )
+You are completely stuffed
+You are not thirsty'
+Walking to the location of the spider to kill them, because they give the best exp.
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+--> north
+--> west
+--> west
+--> west
+--> south
+--> south
+--> south
+--> east
+--> east
+--> east
+--> east
+--> northwest
+--> north
+We have seen the naga[TITLE:Training Grounds
+DESCRIPTION:
+This is the training grounds, a square fenced off field where several 
+small creatures breed and play, ready to be destroyed by students from the 
+academy.  To the east is a path back to the Academy.  To the northeast you 
+see a large dark forest which appears quite forboding.
+
+west	north	south	
+Beings:
+Confirmed: true]
+Walking to the location of the naga
+--> south
+--> southeast
+--> west
+--> west
+--> west
+--> west
+--> north
+--> east
+--> east
+--> east
+We have fought everyone within the threshold at least once.
