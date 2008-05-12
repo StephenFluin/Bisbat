@@ -1,7 +1,8 @@
 package bisbat;
 
 import java.util.ArrayList;
-import java.util.LinkedList;;
+import java.util.LinkedList;
+import java.util.Vector;
 
 public class RoomFinder extends Thread {
 	
@@ -39,8 +40,8 @@ public class RoomFinder extends Thread {
 	}
 	
 	public Room popFirstRoom() {
-		commandList.removeFirst();
-		return foundRooms.removeFirst();
+		commandList.remove(0);
+		return foundRooms.remove(0);
 	}
 	
 
@@ -55,7 +56,7 @@ public class RoomFinder extends Thread {
 		while(foundRooms.size() <= 0) {
 			try {
 				if(failure) {
-					commandList.removeFirst();
+					commandList.remove(0);
 					failure = false;
 					//Bisbat.debug("We had a problem walking somewhere!");
 					return null;
@@ -77,16 +78,16 @@ public class RoomFinder extends Thread {
 		}
 
 		if(bisbat.currentRoom == null) {
-			bisbat.currentRoom = foundRooms.getFirst(); // look at me !TODO replace with removeFirst()?
+			bisbat.currentRoom = foundRooms.get(0); // look at me !TODO replace with remove(0)?
 		} else {
-			Room temp = searchForMatchingRoom(bisbat.currentRoom, foundRooms.getFirst(), 
-					commandList.getFirst());
+			Room temp = searchForMatchingRoom(bisbat.currentRoom, foundRooms.get(0), 
+					commandList.get(0));
 			if(temp != null) {
-				// System.out.println("We found a room that matched!  Replacing " + foundRooms.getFirst().title + " with " + tmp.title); // debugger
-				foundRooms.removeFirst();
-				foundRooms.addFirst(temp);
+				// System.out.println("We found a room that matched!  Replacing " + foundRooms.firstElement().title + " with " + tmp.title); // debugger
+				foundRooms.remove(0);
+				foundRooms.add(temp);
 			} else {
-				//System.out.println("We didn't find a room that matched: " + foundRooms.getFirst().title); // debugger
+				//System.out.println("We didn't find a room that matched: " + foundRooms.firstElement().title); // debugger
 			}
 		}
 		Room tmp = popFirstRoom(); // get first does not "pop" the list
@@ -104,13 +105,13 @@ public class RoomFinder extends Thread {
 	static public Room searchForMatchingRoom(Room indexRoom, Room findMe, String command) {
 		//Bisbat.print("searching for matching room"); // debugger
 		
-		LinkedList<Room> exploredRooms = new LinkedList<Room>();
-		LinkedList<Room> searchQueue = new LinkedList<Room>();
+		Vector<Room> exploredRooms = new Vector<Room>();
+		Vector<Room> searchQueue = new Vector<Room>();
 		ArrayList<Exit> path;
 		searchQueue.add(indexRoom);
 		
 		while(searchQueue.size() > 0) {
-			Room currentRoom = searchQueue.removeFirst();
+			Room currentRoom = searchQueue.remove(0);
 			if(!exploredRooms.contains(currentRoom)) {
 				exploredRooms.add(currentRoom);
 				
@@ -157,14 +158,14 @@ public class RoomFinder extends Thread {
 	 * @param findMe: room that we are searching for matches of
 	 * @return: all rooms that might actually be the given room findMe
 	 */
-	static public LinkedList<Room> searchForAllMatchingRooms(Room indexRoom, Room findMe) {
-		LinkedList<Room> result = new LinkedList<Room>();
-		LinkedList<Room> exploredRooms = new LinkedList<Room>();
-		LinkedList<Room> searchQueue = new LinkedList<Room>();
+	static public Vector<Room> searchForAllMatchingRooms(Room indexRoom, Room findMe) {
+		Vector<Room> result = new Vector<Room>();
+		Vector<Room> exploredRooms = new Vector<Room>();
+		Vector<Room> searchQueue = new Vector<Room>();
 		searchQueue.add(indexRoom);
 		
 		while(searchQueue.size() > 0) {
-			Room currentRoom = searchQueue.removeFirst();
+			Room currentRoom = searchQueue.remove(0);
 			if(!exploredRooms.contains(currentRoom)) {
 				exploredRooms.add(currentRoom);
 				if(currentRoom.matchesRoom(findMe) ) {
@@ -200,7 +201,7 @@ public class RoomFinder extends Thread {
 	@SuppressWarnings("unchecked")
 	static private ArrayList<Exit> searchForPathToUnconfirmedRoom(Room start, ArrayList<Exit> path, ArrayList<Room> explored) {
 		explored.add(start);
-		if(!start.confirmed()) {
+		if(!start.isConfirmed()) {
 			return path;
 		} else {
 			for(Exit e : start.exits) {
@@ -259,15 +260,15 @@ public class RoomFinder extends Thread {
 	 * @param rooms: set of rooms we want to find common confirmed directions from
 	 * @return: a list of the common directions.
 	 */
-	static public LinkedList<String> commonConfirmedDirection(LinkedList<Room> rooms) {
+	static public Vector<String> commonConfirmedDirection(Vector<Room> rooms) {
 		//Bisbat.debug("entering commonConfirmedDirection");
 		if (rooms == null || rooms.isEmpty()) {
 			//Bisbat.debug("exiting commonConfirmedDirection at exit 1");
 			return null;
 		} else if (rooms.size() == 1) {
-			LinkedList<String> result = new LinkedList<String>();
+			Vector<String> result = new Vector<String>();
 			//Bisbat.debug("commonConfirmedDirection line 1");
-			ArrayList<Exit> commonExits = rooms.getFirst().getConfirmedExits();
+			ArrayList<Exit> commonExits = rooms.firstElement().getConfirmedExits();
 			//Bisbat.debug("commonConfirmedDirection line 2 " + commonExits.size());
 			for(Exit exit : commonExits) {
 				result.add(exit.getDirection());
@@ -276,8 +277,8 @@ public class RoomFinder extends Thread {
 			//Bisbat.debug("exiting commonConfirmedDirection at exit 2");
 			return result;
 		}
-		LinkedList<String> result = new LinkedList<String>();
-		ArrayList<Exit> exits = rooms.getFirst().getConfirmedExits();
+		Vector<String> result = new Vector<String>();
+		ArrayList<Exit> exits = rooms.firstElement().getConfirmedExits();
 		for(Exit exit : exits) {
 			String dir = exit.getDirection();
 			for(Room room : rooms) {
@@ -297,8 +298,8 @@ public class RoomFinder extends Thread {
 	 * @param rooms: rooms that we want to find a confirmed path from.
 	 * @return: longest confirmed path (or path of length 10) from 'rooms'.
 	 */
-	static public LinkedList<String> commonConfirmedPath (LinkedList<Room> rooms){
-		return commonConfirmedPath(rooms, 0, new LinkedList<String>());
+	static public Vector<String> commonConfirmedPath (Vector<Room> rooms){
+		return commonConfirmedPath(rooms, 0, new Vector<String>());
 	}
 	
 	/**
@@ -308,19 +309,19 @@ public class RoomFinder extends Thread {
 	 * @param path: path to this point
 	 * @return: longest confirmed path (or path of length 10) from 'rooms'.
 	 */
-	static private LinkedList<String> commonConfirmedPath(LinkedList<Room> rooms, int depth, LinkedList<String> path){
+	static private Vector<String> commonConfirmedPath(Vector<Room> rooms, int depth, Vector<String> path){
 		if (depth >= 10) {
 			return path;
 		}
-		LinkedList<String> commonDirections = commonConfirmedDirection(rooms);
+		Vector<String> commonDirections = commonConfirmedDirection(rooms);
 		//Bisbat.debug("Number of matching rooms: " + rooms.size());
 		if (commonDirections == null || commonDirections.isEmpty()) {
 			return path;
 		}
 		//Bisbat.debug("Number of common confirmed directions: " + commonDirections.size() + " at depth: " + depth);
-		LinkedList<LinkedList<String>> allPaths = new LinkedList<LinkedList<String>>();
+		Vector<Vector<String>> allPaths = new Vector<Vector<String>>();
 		for (String dir : commonDirections) {
-			LinkedList<Room> nextRooms = new LinkedList<Room>();
+			Vector<Room> nextRooms = new Vector<Room>();
 			for (Room room : rooms) {
 				if (room != null && room.getExit(dir) != null) {
 					Room temp = room.getExit(dir).nextRoom;
@@ -329,13 +330,13 @@ public class RoomFinder extends Thread {
 					}
 				}	
 			}
-			LinkedList<String> newPath = new LinkedList<String>(path);
-			newPath.addLast(dir);
+			Vector<String> newPath = new Vector<String>(path);
+			newPath.add(dir);
 			allPaths.add(commonConfirmedPath(nextRooms, depth + 1, newPath));
 		}
-		LinkedList<String> longest = new LinkedList<String>();
+		Vector<String> longest = new Vector<String>();
 		double spatialMax = 0.0d;
-		for (LinkedList<String> list : allPaths) {
+		for (Vector<String> list : allPaths) {
 			if (list.size() > longest.size()) {
 				longest = list;
 			} else if (list.size() ==  longest.size()) {

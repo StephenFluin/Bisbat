@@ -21,6 +21,7 @@ public class RecieveGameOutput extends Thread {
 		while (line != null){
 			try {	
 				line = reader.readLine();
+				//Bisbat.debug("Received: " + line);
 				if(line == null) {
 					return; // done reading lines game output is closed
 				} else if(!line.equals("")) {
@@ -69,10 +70,12 @@ public class RecieveGameOutput extends Thread {
 	public void handleOutput(String string) {
 		Pattern roomPattern = Pattern.compile(".*<>(.*)<>(.*)Exits:([^\\.]*)\\.(.*)$" , Pattern.MULTILINE | Pattern.DOTALL);
 		Matcher roomMatcher = roomPattern.matcher(string);
-
+		//Bisbat.debug("Handling output from server: " + string);
+		
 		if(roomMatcher.matches()) {
-			//Bisbat.debug("~~~~~ Found a Room! ~~~~~");
+			
 			String title = roomMatcher.group(1);
+			//Bisbat.debug("See a Room! ~~~~" + title + "~~~~~");
 			String description =roomMatcher.group(2);
 			String exits = roomMatcher.group(3);
 			String beingsAndObjects = roomMatcher.group(4);

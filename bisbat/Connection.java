@@ -40,6 +40,7 @@ public class Connection {
 	
 	public void sendNavigation(String command) {
 		send(command);
+		Bisbat.debug("Moving " + command);
 		bisbat.roomFindingThread.add(command);
 	}
 	public void close() {

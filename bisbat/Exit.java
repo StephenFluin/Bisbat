@@ -1,7 +1,7 @@
 package bisbat;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Vector;
 import java.util.Hashtable;
 
 public class Exit {
@@ -10,13 +10,13 @@ public class Exit {
 	public boolean isDoorOpen;
 	public Room nextRoom; // null if unknown
 	public String direction;
-	public boolean confirmed;
+	private boolean hypothetical = true;
 	
 	public void confirm() {
-		confirmed = true;
+		hypothetical = false;
 	}
 	public boolean isConfirmed() {
-		return confirmed;
+		return !hypothetical;
 	}
 	
 	/**
@@ -25,7 +25,7 @@ public class Exit {
 	 */
 	public Exit(String dir) {
 		dir = dir.trim().toLowerCase(); // since "West" != "west"
-		confirmed = false;
+		hypothetical = true;
 		if (dir.charAt(0) == '[' || dir.charAt(0) == '<') {
 			isDoor = true;
 			if (dir.charAt(0) == '['){
@@ -68,7 +68,7 @@ public class Exit {
 	}
 
 
-	public static double spatialRelativityCalculation(LinkedList<String> path) {
+	public static double spatialRelativityCalculation(Vector<String> path) {
 		ArrayList<Exit> dummy = new ArrayList<Exit>();
 		for (String dir : path) {
 			Exit temp = new Exit(dir);
@@ -122,7 +122,21 @@ public class Exit {
 		return result;
 	}
 
-	
+	/**
+	 * Tests to see if the exits re both doors, or both not doors, and that
+	 * other is not null.
+	 * @param other
+	 * @return Whether or not the exits could be equal.
+	 */
+	public boolean equals(Exit other) {
+
+		if (other == null) {
+			return false;
+		} else if (isDoor != other.isDoor) {
+			return false;
+		}
+		return true;
+	}
 	
 	
 }

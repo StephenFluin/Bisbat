@@ -27,6 +27,7 @@ public class Room {
 	public Vector<Being> beings = new Vector<Being>();
 	public Vector<Item> items = new Vector<Item>();
 	boolean confirmed = false;
+	boolean unique = true;
 	
 	/**
 	 * Determines if two rooms could be the same.
@@ -34,21 +35,17 @@ public class Room {
 	 * @return: True if this room is undistinguishable from given room.
 	 */
 	public boolean matchesRoom(Room room) {
-		if (room == null) {
-			return true; // null room matches everything
-		} else if (!title.equals(room.title)) {	
-			return false;
-		} else if (!description.equals(room.description)) {
-			return false;
-		} else if (exits.size() != room.exits.size()) {
+		if (room == null ||
+			!title.equals(room.title) ||
+			!description.equals(room.description) ||
+			exits.size() != room.exits.size() ) {
+			
 			return false;
 		} else {
 			Exit temp;
 			for (Exit e : exits) {
 				temp = room.getExit(e.direction);
-				if (temp == null) {
-					return false;
-				} else if (e.isDoor != temp.isDoor) {
+				if(!e.equals(temp)) {
 					return false;
 				}
 			}
@@ -87,8 +84,15 @@ public class Room {
 	 * Returns true if room has been uniquely confirmed
 	 * @return: true if confirmed, else false
 	 */
-	public boolean confirmed() {
+	public boolean isConfirmed() {
 		return confirmed;
+	}
+	
+	public void setUnique(boolean isUnique) {
+		unique = isUnique;
+	}
+	public boolean isUnique() {
+		return unique;
 	}
 	
 	/**
@@ -125,7 +129,7 @@ public class Room {
 	public Exit getRandomConfirmedExit() {
 		ArrayList<Exit> ce = new ArrayList<Exit>();
 		for(Exit e : exits) {
-			if(e.confirmed) {
+			if(e.isConfirmed()) {
 				ce.add(e);
 			}
 		}
@@ -165,11 +169,11 @@ public class Room {
 			if(!exploredRooms.contains(currentPair.left)) {
 				counter++;
 				exploredRooms.add(currentPair.left);
-				System.out.println(currentPair.right + currentPair.left.title + "(" 
-						+ currentPair.left.getUnexploredExits().size() + "/"
-						+ currentPair.left.getUnconfirmedExits().size() + "/"
+				System.out.println(currentPair.right + currentPair.left.title + "(Unexplored Exits: " 
+						+ currentPair.left.getUnexploredExits().size() + "/Unconfirmed Exits:"
+						+ currentPair.left.getUnconfirmedExits().size() + "/Exits"
 						+ currentPair.left.exits.size() + "/"
-						+ currentPair.left.confirmed + ")"); // debugger
+						+ (currentPair.left.isConfirmed() ? "confirmed" : "unconfirmed") + ")"); // debugger
 				for(Exit e : currentPair.left.exits) {
 					if(e.nextRoom != null) {
 						searchQueue.add(new Pair<Room,String>(e.nextRoom, currentPair.right + "  "));
@@ -250,6 +254,44 @@ public class Room {
 			}
 		}
 		return une;
+	}
+
+	
+	/**
+	 * Finds the n closest unique rooms.
+	 * @param neededFriends The number of unique rooms to look for.
+	 * @return A vector of the closest unique rooms.
+	 */
+	public Vector<Room> getUniqueFriends(int neededFriends) {
+		int counter = 0;
+		Vector<Room> exploredRooms = new Vector<Room>();
+		Vector<Pair<Room,String>> searchQueue = new Vector<Pair<Room,String>>();
+		Vector<Room> result = new Vector<Room>();
+		searchQueue.add(new Pair<Room,String>(this, ""));
+		
+		while(searchQueue.size() > 0) {
+			Pair<Room,String> currentPair = searchQueue.remove(0);
+			if(!exploredRooms.contains(currentPair.left)) {
+				
+				exploredRooms.add(currentPair.left);
+				if(currentPair.left.isUnique()) {
+					result.add(currentPair.left);
+					counter++;
+				}
+				for(Exit e : currentPair.left.exits) {
+					if(e.nextRoom != null) {
+						searchQueue.add(new Pair<Room,String>(e.nextRoom, currentPair.right + "  "));
+					}
+				}
+			}
+			if(counter >= neededFriends) {
+				break;
+			}
+		}
+		if(counter < neededFriends) {
+			Bisbat.debug("COULDN'T FIND ENOUGH UNIQUE FRIENDS!!");
+		}
+		return result;
 	}
 	
 	
